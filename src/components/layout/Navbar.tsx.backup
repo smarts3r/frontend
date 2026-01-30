@@ -1,0 +1,336 @@
+import {
+  Gift,
+  Globe,
+  Headphones,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Search,
+  ShoppingCart,
+  Truck,
+  User,
+} from "lucide-react";
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { getCategories } from "@/services/api";
+import { useAuthStore } from "@/store/authStore";
+
+export const Navbar: React.FC = () => {
+  const { t, i18n } = useTranslation();
+  const [categories, setCategories] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { user, isAuthenticated, logout } = useAuthStore();
+  const navigate = useNavigate();
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
+
+  useEffect(() => {
+    async function fetchCategories() {
+      const data = await getCategories();
+      if (Array.isArray(data)) {
+        setCategories(data);
+      } else {
+        // Fallback or mock if API fails/returns different structure
+        setCategories(["Electronics", "Fashion", "Home", "Toys"]);
+      }
+    }
+    fetchCategories();
+  }, []);
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+    document.documentElement.dir = lng === "ar" ? "rtl" : "ltr";
+    document.documentElement.lang = lng;
+  };
+
+  return (
+    <div className="font-sans sticky top-0 z-50">
+      {/* Top Promotional Bar */}
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white py-2 text-center text-sm font-medium">
+        <div className="flex justify-center items-center gap-6">
+          <span className="flex items-center gap-2">
+            <Truck className="w-4 h-4" />
+            FREE SHIPPING ON ALL ORDERS ABOVE 900+
+          </span>
+          <span>•</span>
+          <span className="flex items-center gap-2">
+            <Headphones className="w-4 h-4" />
+            FREE SKINCARE CONSULTATION
+          </span>
+        </div>
+      </div>
+
+      {/* Main Navigation */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link
+              to="/"
+              className="flex items-center space-x-2 rtl:space-x-reverse"
+            >
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg p-1.5 text-white">
+                <Gift className="w-6 h-6" />
+              </div>
+              <span className="text-xl font-bold text-gray-900 tracking-tight">
+                Smart S3r
+              </span>
+            </Link>
+
+            {/* Desktop Search Bar */}
+            <div className="hidden md:flex flex-1 max-w-2xl mx-8">
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  placeholder={t("navbar.searchPlaceholder")}
+                  className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg py-2.5 px-4 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                />
+                <Search
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 cursor-pointer hover:text-blue-600 transition-colors"
+                  onClick={handleSearch}
+                />
+              </div>
+            </div>
+
+            {/* Right Actions */}
+            <div className="flex items-center space-x-4 rtl:space-x-reverse">
+              {/* Language Switcher */}
+              <div className="hidden lg:flex items-center space-x-2 rtl:space-x-reverse">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-600 hover:text-blue-600"
+                  onClick={() =>
+                    changeLanguage(i18n.language === "en" ? "ar" : "en")
+                  }
+                >
+                  <Globe className="w-4 h-4 mr-1 rtl:ml-1" />
+                  {i18n.language === "en" ? "Arabic" : "English"}
+                </Button>
+              </div>
+
+              {/* Cart Icon */}
+              <Link
+                to="/cart"
+                className="relative flex items-center space-x-1 rtl:space-x-reverse hover:text-blue-600 transition-colors text-gray-700"
+              >
+                <ShoppingCart className="w-6 h-6" />
+                <span className="hidden lg:inline text-sm font-medium">
+                  {t("navbar.cart")}
+                </span>
+                <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  0
+                </span>
+              </Link>
+
+              {/* User Account */}
+              {isAuthenticated ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="flex items-center space-x-1 rtl:space-x-reverse hover:text-blue-600 transition-colors text-gray-700 hover:bg-transparent"
+                    >
+                      <User className="w-6 h-6" />
+                      <span className="hidden lg:inline text-sm font-medium">
+                        {user?.username || "User"}
+                      </span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {user?.role === "admin" && (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link
+                            to="/admin"
+                            className="cursor-pointer w-full flex items-center"
+                          >
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            <span>Admin Dashboard</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="cursor-pointer w-full">
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/orders" className="cursor-pointer w-full">
+                        Orders
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/wishlist" className="cursor-pointer w-full">
+                        Wishlist
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="text-red-500"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link
+                  to="/login"
+                  className="flex items-center space-x-1 rtl:space-x-reverse hover:text-blue-600 transition-colors text-gray-700"
+                >
+                  <User className="w-6 h-6" />
+                  <span className="hidden lg:inline text-sm font-medium">
+                    {t("navbar.signin")}
+                  </span>
+                </Link>
+              )}
+
+              {/* Mobile Menu Trigger */}
+              <div className="lg:hidden">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-gray-700 hover:bg-gray-100"
+                    >
+                      <Menu className="h-6 w-6" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent
+                    side="right"
+                    className="w-[300px] sm:w-[400px] bg-white text-gray-900 border-none"
+                  >
+                    <SheetHeader className="mb-6">
+                      <SheetTitle className="text-left text-2xl font-bold text-blue-600 flex items-center gap-2">
+                        <Gift className="w-6 h-6" /> Smart S3r
+                      </SheetTitle>
+                    </SheetHeader>
+                    <div className="space-y-6">
+                      {/* Mobile Search */}
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder={t("navbar.searchPlaceholder")}
+                          className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded-lg py-2.5 px-4 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                        />
+                        <Search
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 cursor-pointer hover:text-blue-600"
+                          onClick={handleSearch}
+                        />
+                      </div>
+
+                      <div className="flex flex-col space-y-3">
+                        <h3 className="font-semibold text-gray-500 uppercase text-xs tracking-wider">
+                          Menu
+                        </h3>
+                        <Link
+                          to="/"
+                          className="text-lg font-medium hover:text-blue-600 transition-colors"
+                        >
+                          {t("navbar.home")}
+                        </Link>
+                        <Link
+                          to="/products"
+                          className="text-lg font-medium hover:text-blue-600 transition-colors"
+                        >
+                          {t("navbar.shopCategories")}
+                        </Link>
+                        <Link
+                          to="/checkout"
+                          className="text-lg font-medium hover:text-blue-600 transition-colors"
+                        >
+                          {t("navbar.checkout")}
+                        </Link>
+                      </div>
+
+                      <div className="border-t border-gray-100 pt-6">
+                        <h3 className="font-semibold text-gray-500 uppercase text-xs tracking-wider mb-3">
+                          Categories
+                        </h3>
+                        <div className="grid grid-cols-1 gap-2">
+                          {categories.map((cat) => (
+                            <Link
+                              key={cat}
+                              to={`/products?category=${cat}`}
+                              className="text-gray-600 hover:text-purple-600 py-1"
+                            >
+                              {cat}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Navigation Links */}
+          <div className="hidden lg:flex items-center justify-center space-x-8 pb-4">
+            <nav className="flex items-center space-x-8 text-sm font-medium text-gray-700">
+              <Link
+                to="/"
+                className="hover:text-blue-600 transition-colors px-2 py-1 border-b-2 border-transparent hover:border-blue-600"
+              >
+                {t("navbar.home")}
+              </Link>
+              <Link
+                to="/products"
+                className="hover:text-blue-600 transition-colors px-2 py-1 border-b-2 border-transparent hover:border-blue-600"
+              >
+                {t("navbar.shopCategories")}
+              </Link>
+              <Link
+                to="/checkout"
+                className="hover:text-blue-600 transition-colors px-2 py-1 border-b-2 border-transparent hover:border-blue-600"
+              >
+                {t("navbar.checkout")}
+              </Link>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -1,0 +1,20 @@
+{
+  "welcome": "مرحبا بك في Smart S3r",
+  "greeting": "مرحبا, {{name}}",
+  "english": "الإنجليزية",
+  "arabic": "العربية",
+  "productCard": {
+    "addToCart": "أضف للسلة",
+    "inCart": "في السلة"
+  },
+  "navbar": {
+    "search_placeholder": "ابحث عن منتجات...",
+    "wishlist": "المفضلة",
+    "cart": "السلة",
+    "signin": "تسجيل الدخول",
+    "all_categories": "كل الفئات",
+    "home": "الرئيسية",
+    "about_us": "من نحن",
+    "shop": "المتجر"
+  }
+}
