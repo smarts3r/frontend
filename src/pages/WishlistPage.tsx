@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 import { useCurrencyFormat } from "@/lib/currency";
+import type { Product } from "@/types";
 
 export default function WishlistPage() {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ export default function WishlistPage() {
     }
   };
 
-  const handleAddToCart = async (product: any) => {
+  const handleAddToCart = async (product: Product) => {
     setIsAddingToCart(product.id);
     try {
       await new Promise((resolve) => setTimeout(resolve, 300));

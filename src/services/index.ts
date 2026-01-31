@@ -35,7 +35,7 @@ export const categoryService = {
 
     // If data is an array of objects with name property, extract names
     if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object' && data[0].name) {
-      return data.map((item: any) => item.name);
+      return data.map((item: { name: string }) => item.name);
     }
 
     // Otherwise return as is

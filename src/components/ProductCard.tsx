@@ -1,7 +1,7 @@
 import { Heart, ShoppingCart } from "lucide-react";
 import type React from "react";
 import { useTranslation } from "react-i18next";
-import { Button, Card } from "flowbite-react";
+import { Button } from "flowbite-react";
 import { useCurrencyFormat } from "@/lib/currency";
 import type { Product } from "@/types";
 

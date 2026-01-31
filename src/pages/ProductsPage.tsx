@@ -94,7 +94,7 @@ const ProductsPage = () => {
     };
 
     fetchData();
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     let filtered = products;
@@ -222,7 +222,8 @@ const ProductsPage = () => {
               placeholder="Search products by name or category..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              icon={Search}
+              rightIcon={Search}
+              sizing="lg"
               className="w-full"
             />
           </div>

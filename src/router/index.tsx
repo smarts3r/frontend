@@ -4,7 +4,7 @@ import AboutPage from "@/pages/AboutPage";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import CartPage from "@/pages/CartPage";
 import CheckoutPage from "@/pages/CheckoutPage";
-import { HomePage } from "@/pages/HomePage";
+import HomePage from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
 import OrdersPage from "@/pages/OrdersPage";
 import CategoriesPage from "@/pages/CategoriesPage";

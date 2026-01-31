@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ProductCard } from '@/components/common/ProductCard'; // Corrected import path
 import { Button } from '@/components/ui/button';
 import { useCartStore } from '@/store/cartStore'; // Import useCartStore
+import type { Product } from '@/types';
 
 // Mock data if backend connection fails or for initial design
 const MOCK_PRODUCTS = [
@@ -64,7 +65,7 @@ export const LandingPage: React.FC = () => {
     const [products] = useState(MOCK_PRODUCTS);
     const addItem = useCartStore((state) => state.addItem); // Get addItem from store
 
-    const handleAddToCart = (product: any) => { // Define handleAddToCart
+    const handleAddToCart = (product: Product) => { // Define handleAddToCart
         addItem(product, 1);
     };
 
@@ -112,7 +113,6 @@ export const LandingPage: React.FC = () => {
                             key={product.id}
                             product={product}
                             onAddToCart={() => handleAddToCart(product)} // Pass the product to handleAddToCart
-                            onToggleFavorite={(id) => console.log(`Toggled favorite ${id}`)}
                         />
                     ))}
                 </div>

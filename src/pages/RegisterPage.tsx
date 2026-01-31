@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -34,7 +33,6 @@ import api from "@/services/api";
 import { useAuthStore } from "@/store/authStore";
 
 export default function RegisterPage() {
-  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -92,11 +90,13 @@ export default function RegisterPage() {
       login(response.data);
       toast.success("Account created successfully!");
       navigate("/home");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Registration Error:", error);
-      const errorMessage = error.response?.data?.message || "Registration failed";
-      setError(errorMessage);
-      toast.error(errorMessage);
+      const errorMessage = error instanceof Error && 'response' in error 
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message 
+        : "Registration failed";
+      setError(errorMessage || "Registration failed");
+      toast.error(errorMessage || "Registration failed");
     } finally {
       setIsLoading(false);
     }

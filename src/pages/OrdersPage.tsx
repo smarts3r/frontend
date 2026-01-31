@@ -7,7 +7,6 @@ import {
   Clock,
   Truck,
   XCircle,
-  ChevronRight,
   Search,
   ArrowLeft,
   Download,
@@ -17,12 +16,9 @@ import {
   Badge,
   Button,
   Card,
-  Label,
   Select,
   TextInput,
   Spinner,
-  Tabs,
-  TabItem,
 } from "flowbite-react";
 import { toast } from "sonner";
 import { useGetUserOrders, useCancelOrder } from "@/hooks/useOrders";
@@ -106,7 +102,7 @@ export default function OrdersPage() {
     const config = statusConfig[status] || statusConfig.pending;
     const Icon = config.icon;
     return (
-      <Badge color={config.color as any}>
+      <Badge color={config.color as "yellow" | "blue" | "purple" | "indigo" | "green" | "red"}>
         <Icon className="w-3 h-3 mr-1 inline" />
         {config.label}
       </Badge>
@@ -162,7 +158,8 @@ export default function OrdersPage() {
                   placeholder="Search orders..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  icon={Search}
+                  rightIcon={Search}
+                  sizing="md"
                   className="w-full"
                 />
               </div>

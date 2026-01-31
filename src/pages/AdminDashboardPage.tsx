@@ -94,9 +94,12 @@ export default function AdminDashboardPage() {
       toast.success("Products imported successfully!");
       setFile(null);
       // Optionally refresh product list here
-    } catch (error: any) {
+    } catch (error) {
       console.error("Import failed:", error);
-      toast.error(error.response?.data?.message || "Import failed");
+      const errorMessage = error instanceof Error && 'response' in error 
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message 
+        : "Import failed";
+      toast.error(errorMessage || "Import failed");
     } finally {
       setUploading(false);
     }

@@ -34,5 +34,11 @@
     "src/**/*.tsx",
     "src/**/*.d.ts",
     "vite-env.d.ts"
+  ],
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/__tests__/**",
+    "src/test/**"
   ]
 }

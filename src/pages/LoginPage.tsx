@@ -65,9 +65,12 @@ export default function LoginPage() {
       login(response.data);
       toast.success(t("loginPage.welcomeBackMessage"));
       navigate("/home");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Login Error:", error);
-      toast.error(error.response?.data?.message || t("loginPage.loginFailed"));
+      const errorMessage = error instanceof Error && 'response' in error 
+        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message 
+        : t("loginPage.loginFailed");
+      toast.error(errorMessage || t("loginPage.loginFailed"));
     } finally {
       setIsLoading(false);
     }

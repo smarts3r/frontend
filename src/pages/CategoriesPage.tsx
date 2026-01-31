@@ -161,7 +161,7 @@ export default function CategoriesPage() {
                 placeholder="Search categories..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                icon={Search}
+                rightIcon={Search}
                 sizing="lg"
               />
             </div>
