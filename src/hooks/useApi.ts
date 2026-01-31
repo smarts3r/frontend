@@ -32,7 +32,7 @@ export function useApi<T>() {
       if (import.meta.env.NODE_ENV === 'test') {
         url = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
       } else {
-        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+        const baseUrl = import.meta.env.VITE_API_URL || '';
         url = `${baseUrl}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
       }
 
@@ -128,55 +128,55 @@ export function useApi<T>() {
 
 // Specific API hooks
 export const useGet = <T,>() => {
-  const apiHook = useApi<T>();
+  const { request, ...apiHook } = useApi<T>();
 
   const execute = useCallback(async (endpoint: string, options: RequestInit = {}) => {
-    return apiHook.request(endpoint, {
+    return request(endpoint, {
       method: 'GET',
       ...options
     });
-  }, [apiHook]);
+  }, [request]);
 
-  return { ...apiHook, execute };
+  return { ...apiHook, request, execute };
 };
 
 export const usePost = <T,>() => {
-  const apiHook = useApi<T>();
+  const { request, ...apiHook } = useApi<T>();
 
   const execute = useCallback(async (endpoint: string, body?: unknown, options: RequestInit = {}) => {
-    return apiHook.request(endpoint, {
+    return request(endpoint, {
       method: 'POST',
       body: body ? JSON.stringify(body) : undefined,
       ...options
     });
-  }, [apiHook]);
+  }, [request]);
 
-  return { ...apiHook, execute };
+  return { ...apiHook, request, execute };
 };
 
 export const usePut = <T,>() => {
-  const apiHook = useApi<T>();
+  const { request, ...apiHook } = useApi<T>();
 
   const execute = useCallback(async (endpoint: string, body?: unknown, options: RequestInit = {}) => {
-    return apiHook.request(endpoint, {
+    return request(endpoint, {
       method: 'PUT',
       body: body ? JSON.stringify(body) : undefined,
       ...options
     });
-  }, [apiHook]);
+  }, [request]);
 
-  return { ...apiHook, execute };
+  return { ...apiHook, request, execute };
 };
 
 export const useDelete = <T,>() => {
-  const apiHook = useApi<T>();
+  const { request, ...apiHook } = useApi<T>();
 
   const execute = useCallback(async (endpoint: string, options: RequestInit = {}) => {
-    return apiHook.request(endpoint, {
+    return request(endpoint, {
       method: 'DELETE',
       ...options
     });
-  }, [apiHook]);
+  }, [request]);
 
-  return { ...apiHook, execute };
+  return { ...apiHook, request, execute };
 };

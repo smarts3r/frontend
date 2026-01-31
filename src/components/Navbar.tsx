@@ -1,14 +1,11 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
-    Navbar as FlowbiteNavbar,
-    NavbarBrand,
     Dropdown,
     DropdownHeader,
     DropdownItem,
     DropdownDivider,
-    Avatar,
-    TextInput
+    Avatar
 } from 'flowbite-react';
 import {
     Search,
@@ -39,20 +36,25 @@ export const Navbar: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
-    // Categories loading
-    const loadCategories = useCallback(async () => {
-        await getCategories();
-    }, [getCategories]);
-
     useEffect(() => {
-        loadCategories();
+        const fetchData = async () => {
+            try {
+                await getCategories();
+            } catch (err) {
+                console.error("Failed to load categories", err);
+            }
+        };
+
+        fetchData();
 
         const handleScroll = () => {
             setScrolled(window.scrollY > 20);
         };
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [loadCategories]);
+
+
+    }, [getCategories]);
 
     const handleSearch = (e?: React.FormEvent) => {
         e?.preventDefault();
@@ -77,8 +79,9 @@ export const Navbar: React.FC = () => {
         flex items-center text-sm font-semibold transition-all duration-300
         ${isActive(path)
             ? 'text-blue-600 bg-blue-50/80 shadow-sm border border-blue-100/50'
-            : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50/80'} 
-        px-4 py-2 rounded-xl
+            : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50/80'
+        }
+px-4 py-2 rounded-xl
     `;
 
     const getLangDisplay = (lang: string) => {
@@ -89,26 +92,24 @@ export const Navbar: React.FC = () => {
     };
 
     return (
-        <FlowbiteNavbar
-            fluid
-            rounded
+        <nav
             className={`transition-all duration-300 border-b border-gray-100 sticky top-0 z-50 py-3 ${scrolled
                 ? 'bg-white/90 backdrop-blur-xl shadow-lg shadow-gray-200/20'
                 : 'bg-white/95 backdrop-blur-md shadow-sm'
-                }`}
+                } `}
         >
             <div className="flex flex-wrap items-center justify-between w-full mx-auto max-w-7xl">
 
                 {/* 1. Logo Section */}
                 <div className="flex items-center gap-6">
-                    <NavbarBrand as={Link} to="/" className="flex items-center gap-2 group">
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-105 transition-transform duration-300">
+                    <div onClick={() => navigate('/')} className="flex items-center gap-2 group cursor-pointer">
+                        <div className="w-10 h-10 bg-linear-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-105 transition-transform duration-300">
                             <span className="text-white font-black text-xl">S</span>
                         </div>
-                        <span className="text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 hidden sm:block tracking-tight">
+                        <span className="text-xl font-black bg-clip-text text-transparent bg-linear-to-r from-gray-900 via-blue-900 to-indigo-900 hidden sm:block tracking-tight">
                             SmartS3r
                         </span>
-                    </NavbarBrand>
+                    </div>
 
                     {/* Desktop Menu Links */}
                     <div className="hidden lg:flex items-center gap-1">
@@ -179,7 +180,7 @@ export const Navbar: React.FC = () => {
                 <div className="flex items-center gap-1 sm:gap-2">
                     {/* Wishlist */}
                     <Link to="/wishlist" className="hidden sm:flex relative p-2.5 text-gray-500 hover:bg-red-50 hover:text-red-500 rounded-xl transition-all hover:scale-110">
-                        <Heart className={`w-5 h-5 ${location.pathname === '/wishlist' ? 'fill-red-500 text-red-500' : ''}`} />
+                        <Heart className={`w - 5 h - 5 ${location.pathname === '/wishlist' ? 'fill-red-500 text-red-500' : ''} `} />
                     </Link>
 
                     {/* Cart */}
@@ -199,10 +200,10 @@ export const Navbar: React.FC = () => {
                         arrowIcon={false}
                         inline
                         label={
-                            <button className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 font-bold text-xs rounded-xl hover:bg-gray-100 transition-all uppercase tracking-wider">
+                            <div className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 font-bold text-xs rounded-xl hover:bg-gray-100 transition-all uppercase tracking-wider cursor-pointer">
                                 <span>{getLangDisplay(i18n.language).flag}</span>
                                 <span>{getLangDisplay(i18n.language).label}</span>
-                            </button>
+                            </div>
                         }
                     >
                         <DropdownItem onClick={() => changeLanguage('en')} className="gap-2 font-medium">🇺🇸 English</DropdownItem>
@@ -218,7 +219,7 @@ export const Navbar: React.FC = () => {
                                 <div className="p-0.5 border-2 border-transparent hover:border-blue-500 rounded-2xl transition-all cursor-pointer">
                                     <Avatar
                                         alt="User"
-                                        img={user?.avatar}
+                                        img={user?.avatar as string | undefined}
                                         placeholderInitials={user?.username?.charAt(0).toUpperCase()}
                                         rounded
                                         size="sm"
@@ -227,12 +228,12 @@ export const Navbar: React.FC = () => {
                                 </div>
                             }
                         >
-                            <div className="px-5 py-4 bg-gradient-to-br from-gray-50 to-white">
+                            <div className="px-5 py-4 bg-linear-to-br from-gray-50 to-white">
                                 <span className="block text-sm font-black text-gray-900">{user?.username}</span>
                                 <span className="block truncate text-xs text-gray-500 mt-0.5">{user?.email}</span>
                             </div>
                             <DropdownDivider className="my-0 border-gray-100" />
-                            {user.role.toUpperCase() === "ADMIN" && (
+                            {user?.role?.toUpperCase() === "ADMIN" && (
                                 <DropdownItem as={Link} to="/admin" icon={LayoutDashboard} className="font-semibold text-xs py-3">Dashboard</DropdownItem>
                             )}
                             <DropdownItem as={Link} to="/profile" icon={User} className="font-semibold text-xs py-3">Profile Settings</DropdownItem>
@@ -269,7 +270,7 @@ export const Navbar: React.FC = () => {
             </div>
 
             {/* Mobile Menu */}
-            <div className={`lg:hidden w-full transition-all duration-500 ease-in-out overflow-hidden ${isOpen ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'}`}>
+            <div className={`lg:hidden w-full transition-all duration-500 ease-in-out overflow-hidden ${isOpen ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'} `}>
                 <div className="px-4 pt-2 pb-8 bg-white border-t border-gray-50 space-y-6">
                     {/* Mobile Search */}
                     <form onSubmit={handleSearch} className="relative mt-4">
@@ -287,7 +288,7 @@ export const Navbar: React.FC = () => {
                     <div className="space-y-1.5">
                         <Link
                             to="/"
-                            className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all ${isActive('/') ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-gray-600 hover:bg-gray-50'}`}
+                            className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all ${isActive('/') ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-gray-600 hover:bg-gray-50'} `}
                             onClick={() => setIsOpen(false)}
                         >
                             <HomeIcon className="w-5 h-5" />
@@ -295,7 +296,7 @@ export const Navbar: React.FC = () => {
                         </Link>
                         <Link
                             to="/products"
-                            className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all ${isActive('/products') ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-gray-600 hover:bg-gray-50'}`}
+                            className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold transition-all ${isActive('/products') ? 'bg-blue-50 text-blue-600 shadow-sm' : 'text-gray-600 hover:bg-gray-50'} `}
                             onClick={() => setIsOpen(false)}
                         >
                             <Package className="w-5 h-5" />
@@ -351,7 +352,7 @@ export const Navbar: React.FC = () => {
                     )}
                 </div>
             </div>
-        </FlowbiteNavbar>
+        </nav>
     );
 };
 

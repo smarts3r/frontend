@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/Footer";
+import { Navbar } from "../Navbar";
+import { Footer } from "../Footer";
 
 import { Outlet } from "react-router-dom";
 
@@ -23,7 +23,7 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className={`min-h-screen flex flex-col ${isRTL ? "font-arabic" : "font-latin"}`}>
       <Navbar />
-      <main className="flex-grow">
+      <main className="grow">
         {children || <Outlet />}
       </main>
       <Footer />
