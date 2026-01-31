@@ -2,16 +2,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Eye,
   EyeOff,
-  Smartphone,
-  Laptop,
-  Headphones,
-  ArrowRight,
   User,
   Mail,
   Lock,
-  Chrome,
-  Facebook,
-  Shield,
+  ArrowRight,
   Check,
   X,
 } from "lucide-react";
@@ -108,66 +102,26 @@ export default function RegisterPage() {
   const hasNumber = /[0-9]/.test(password || "");
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
-      {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-900 to-gray-800 relative flex-col justify-between p-12 text-white">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550009158-9ebf69173e03?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')] bg-cover bg-center opacity-20" />
-        
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 text-2xl font-bold">
-            <div className="p-2 bg-blue-600 rounded-lg">
-              <Smartphone className="w-6 h-6" />
-            </div>
-            <span>Smart S3r</span>
-          </div>
-        </div>
-
-        <div className="relative z-10 max-w-lg">
-          <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-            Join Smart S3r Today
-          </h1>
-          <p className="text-lg text-gray-300 mb-8">
-            Create an account to unlock exclusive deals, track orders, and experience next-gen shopping.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg text-sm">
-              <Laptop className="w-4 h-4" /> Latest Tech
-            </div>
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg text-sm">
-              <Shield className="w-4 h-4" /> Secure Shopping
-            </div>
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg text-sm">
-              <Headphones className="w-4 h-4" /> 24/7 Support
-            </div>
-          </div>
-        </div>
-
-        <div className="relative z-10 text-sm text-gray-400">
-          © 2024 Smart S3r. All rights reserved.
-        </div>
-      </div>
-
-      {/* Right Side - Registration Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-4 sm:p-6 lg:p-8 overflow-y-auto">
-        {/* Mobile Header */}
-        <div className="lg:hidden w-full max-w-md mb-6 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 bg-blue-100 rounded-2xl">
-              <Smartphone className="w-8 h-8 text-blue-600" />
-            </div>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">Smart S3r</h1>
-          <p className="text-sm text-gray-500">Create your account</p>
-        </div>
-
-        <Card className="w-full max-w-md shadow-lg">
+    <div 
+      className="min-h-screen w-full flex items-center justify-center bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: "url('https://images.unsplash.com/photo-1498049860654-af1e5e5667ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')"
+      }}
+    >
+      {/* Overlay for better contrast */}
+      <div className="absolute inset-0 bg-black/40" />
+      
+      {/* Register Card */}
+      <div className="relative z-10 w-full max-w-md px-4">
+        <Card className="bg-white/90 backdrop-blur-sm shadow-2xl border-0">
           <div className="p-6 sm:p-8">
-            <div className="hidden lg:block mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
                 Create Account
-              </h2>
-              <p className="mt-2 text-gray-600">
-                Fill in your details to get started
+              </h1>
+              <p className="text-gray-600">
+                Join Smart S3r today
               </p>
             </div>
 
@@ -177,18 +131,21 @@ export default function RegisterPage() {
               </Alert>
             )}
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               {/* Name Field */}
               <div>
-                <Label htmlFor="name">Full Name</Label>
-                <TextInput
-                  id="name"
-                  type="text"
-                  placeholder="John Doe"
-                  icon={User}
-                  color={errors.name ? "failure" : "gray"}
-                  {...register("name")}
-                />
+                <Label htmlFor="name" className="mb-2 block">Full Name</Label>
+                <div className="relative">
+                  <TextInput
+                    id="name"
+                    type="text"
+                    placeholder="John Doe"
+                    icon={User}
+                    color={errors.name ? "failure" : "gray"}
+                    className="w-full"
+                    {...register("name")}
+                  />
+                </div>
                 {errors.name && (
                   <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
                 )}
@@ -196,15 +153,18 @@ export default function RegisterPage() {
 
               {/* Email Field */}
               <div>
-                <Label htmlFor="email">Email Address</Label>
-                <TextInput
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  icon={Mail}
-                  color={errors.email ? "failure" : "gray"}
-                  {...register("email")}
-                />
+                <Label htmlFor="email" className="mb-2 block">Email Address</Label>
+                <div className="relative">
+                  <TextInput
+                    id="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    icon={Mail}
+                    color={errors.email ? "failure" : "gray"}
+                    className="w-full"
+                    {...register("email")}
+                  />
+                </div>
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
                 )}
@@ -212,7 +172,7 @@ export default function RegisterPage() {
 
               {/* Password Field */}
               <div>
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="mb-2 block">Password</Label>
                 <div className="relative">
                   <TextInput
                     id="password"
@@ -220,11 +180,12 @@ export default function RegisterPage() {
                     placeholder="••••••••"
                     icon={Lock}
                     color={errors.password ? "failure" : "gray"}
+                    className="w-full"
                     {...register("password")}
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center pr-3 text-gray-400 hover:text-gray-600"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
@@ -259,7 +220,7 @@ export default function RegisterPage() {
 
               {/* Confirm Password Field */}
               <div>
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword" className="mb-2 block">Confirm Password</Label>
                 <div className="relative">
                   <TextInput
                     id="confirmPassword"
@@ -267,11 +228,12 @@ export default function RegisterPage() {
                     placeholder="••••••••"
                     icon={Lock}
                     color={errors.confirmPassword ? "failure" : "gray"}
+                    className="w-full"
                     {...register("confirmPassword")}
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center pr-3 text-gray-400 hover:text-gray-600"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
                     {showConfirmPassword ? (
@@ -308,14 +270,13 @@ export default function RegisterPage() {
               {/* Submit Button */}
               <Button
                 type="submit"
-                color="dark"
                 size="lg"
-                className="w-full"
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white border-0"
                 disabled={isLoading || !agreeTerms}
               >
                 {isLoading ? (
                   <>
-                    <Spinner className="mr-2" />
+                    <Spinner className="mr-2" size="sm" />
                     Creating account...
                   </>
                 ) : (
@@ -326,29 +287,8 @@ export default function RegisterPage() {
                 )}
               </Button>
 
-              {/* Divider */}
-              <div className="relative flex items-center py-2">
-                <div className="flex-grow border-t border-gray-200"></div>
-                <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">
-                  Or sign up with
-                </span>
-                <div className="flex-grow border-t border-gray-200"></div>
-              </div>
-
-              {/* Social Login */}
-              <div className="grid grid-cols-2 gap-3">
-                <Button color="light" size="sm" className="w-full">
-                  <Chrome className="w-4 h-4 mr-2" />
-                  Google
-                </Button>
-                <Button color="light" size="sm" className="w-full">
-                  <Facebook className="w-4 h-4 mr-2" />
-                  Facebook
-                </Button>
-              </div>
-
               {/* Login Link */}
-              <p className="text-center text-sm text-gray-600 pt-2">
+              <p className="text-center text-sm text-gray-600 pt-4">
                 Already have an account?{" "}
                 <Link
                   to="/login"

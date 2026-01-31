@@ -39,6 +39,14 @@ export interface Order {
   created_at?: string;
   updated_at?: string;
   product?: Product;
+  status?: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  total?: number;
+  orderItems?: Array<{
+    product_id: number;
+    quantity: number;
+    unit_price: number;
+    product?: Product;
+  }>;
 }
 
 export interface User {
@@ -70,8 +78,33 @@ export interface Profile {
 
 export interface AuthResponse {
   user: User;
-  token: string;
+  accessToken: string;
   refreshToken: string;
+}
+
+export interface AdminDashboardData {
+  totalUsers: number;
+  totalProducts: number;
+  totalOrders: number;
+  totalRevenue: number;
+  monthlySales: Array<{ month: string; sales: number }>;
+  revenueGrowth?: number;
+  ordersGrowth?: number;
+  productsGrowth?: number;
+  usersGrowth?: number;
+}
+
+export interface AdminOrder extends Order {
+  customerEmail: string;
+  customerName: string;
+  status?: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  total?: number;
+  orderItems?: Array<{
+    product_id: number;
+    quantity: number;
+    unit_price: number;
+    product?: Product;
+  }>;
 }
 
 export interface ProductCardProps {

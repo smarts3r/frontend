@@ -5,10 +5,8 @@ import { ProductCard } from "@/components/common/ProductCard";
 import {
   Badge,
   Button,
-  Card,
   Checkbox,
   Label,
-  RangeSlider,
   Select,
   TextInput,
 } from "flowbite-react";
@@ -23,21 +21,38 @@ const ProductsPage = () => {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Initialize states from URL params
   const [selectedCategory, setSelectedCategory] = useState<string>(
     searchParams.get("category") || "all",
   );
   const [searchTerm, setSearchTerm] = useState(
     searchParams.get("search") || "",
   );
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
-  const [priceInitialized, setPriceInitialized] = useState(false);
-  const [selectedStock, setSelectedStock] = useState<string>("all");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState<[number, number]>(() => {
+    const minPrice = searchParams.get("minPrice");
+    const maxPrice = searchParams.get("maxPrice");
+    return [
+      minPrice ? parseInt(minPrice) : 0,
+      maxPrice ? parseInt(maxPrice) : 1000,
+    ];
+  });
+  const [selectedStock, setSelectedStock] = useState<string>(
+    searchParams.get("stock") || "all",
+  );
+  const [selectedTags, setSelectedTags] = useState<string[]>(() => {
+    const tags = searchParams.get("tags");
+    return tags ? tags.split(",") : [];
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(() => {
+    return parseInt(searchParams.get("page") || "1");
+  });
   const [productsPerPage] = useState(12);
+  const [productPriceRange, setProductPriceRange] = useState<[number, number]>([0, 1000]);
   const addItem = useCartStore((state) => state.addItem);
 
+  // Update URL when filters change
   useEffect(() => {
     const params = new URLSearchParams();
     if (selectedCategory !== "all") params.set("category", selectedCategory);
@@ -58,11 +73,34 @@ const ProductsPage = () => {
     setSearchParams,
   ]);
 
+  // Sync state with URL params when they change externally
   useEffect(() => {
-    const page = parseInt(searchParams.get("page") || "1");
-    setCurrentPage(page);
+    const urlCategory = searchParams.get("category") || "all";
+    const urlSearch = searchParams.get("search") || "";
+    const urlMinPrice = searchParams.get("minPrice");
+    const urlMaxPrice = searchParams.get("maxPrice");
+    const urlStock = searchParams.get("stock") || "all";
+    const urlTags = searchParams.get("tags");
+    const urlPage = parseInt(searchParams.get("page") || "1");
+
+    if (urlCategory !== selectedCategory) setSelectedCategory(urlCategory);
+    if (urlSearch !== searchTerm) setSearchTerm(urlSearch);
+    if (urlStock !== selectedStock) setSelectedStock(urlStock);
+    if (urlPage !== currentPage) setCurrentPage(urlPage);
+
+    const newMinPrice = urlMinPrice ? parseInt(urlMinPrice) : 0;
+    const newMaxPrice = urlMaxPrice ? parseInt(urlMaxPrice) : 1000;
+    if (newMinPrice !== priceRange[0] || newMaxPrice !== priceRange[1]) {
+      setPriceRange([newMinPrice, newMaxPrice]);
+    }
+
+    const newTags = urlTags ? urlTags.split(",") : [];
+    if (JSON.stringify(newTags) !== JSON.stringify(selectedTags)) {
+      setSelectedTags(newTags);
+    }
   }, [searchParams]);
 
+  // Fetch products
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -81,19 +119,12 @@ const ProductsPage = () => {
         setProducts(productsData);
         setCategories(categoriesData || []);
 
+        // Set product price range for display
         if (productsData.length > 0) {
           const prices = productsData.map((p) => p.price);
-          const productMinPrice = Math.min(...prices);
-          const productMaxPrice = Math.max(...prices);
-
-          // Check for URL params first, otherwise use product price range
-          const urlMinPrice = searchParams.get("minPrice");
-          const urlMaxPrice = searchParams.get("maxPrice");
-          const finalMinPrice = urlMinPrice ? Math.max(parseInt(urlMinPrice), productMinPrice) : productMinPrice;
-          const finalMaxPrice = urlMaxPrice ? Math.min(parseInt(urlMaxPrice), productMaxPrice) : productMaxPrice;
-
-          setPriceRange([finalMinPrice, finalMaxPrice]);
-          setPriceInitialized(true);
+          const minPrice = Math.min(...prices);
+          const maxPrice = Math.max(...prices);
+          setProductPriceRange([minPrice, maxPrice]);
         }
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -105,33 +136,37 @@ const ProductsPage = () => {
     };
 
     fetchData();
-  }, [searchParams]);
+  }, []);
 
+  // Apply filters
   useEffect(() => {
-    let filtered = products;
+    let filtered = [...products];
 
+    // Category filter
     if (selectedCategory !== "all") {
       filtered = filtered.filter(
-        (product) => product.category === selectedCategory
+        (product) => product.category?.toLowerCase() === selectedCategory.toLowerCase()
       );
     }
 
+    // Search filter
     if (searchTerm) {
+      const term = searchTerm.toLowerCase();
       filtered = filtered.filter(
         (product) =>
-          product.name.includes(searchTerm) ||
-          product.category.includes(searchTerm),
+          product.name?.toLowerCase().includes(term) ||
+          product.category?.toLowerCase().includes(term) ||
+          product.description?.toLowerCase().includes(term)
       );
     }
 
-    // Filter by price only after price range has been initialized from products
-    if (priceInitialized) {
-      filtered = filtered.filter(
-        (product) =>
-          product.price >= priceRange[0] && product.price <= priceRange[1],
-      );
-    }
+    // Price filter
+    filtered = filtered.filter(
+      (product) =>
+        product.price >= priceRange[0] && product.price <= priceRange[1]
+    );
 
+    // Stock filter
     if (selectedStock !== "all") {
       filtered = filtered.filter((product) => {
         if (selectedStock === "in-stock") {
@@ -143,13 +178,18 @@ const ProductsPage = () => {
       });
     }
 
+    // Tags filter
     if (selectedTags.length > 0) {
       filtered = filtered.filter((product) =>
-        selectedTags.includes(product.category),
+        selectedTags.includes(product.category)
       );
     }
 
     setFilteredProducts(filtered);
+    // Reset to page 1 when filters change
+    if (currentPage > 1) {
+      setCurrentPage(1);
+    }
   }, [
     products,
     selectedCategory,
@@ -157,45 +197,35 @@ const ProductsPage = () => {
     priceRange,
     selectedStock,
     selectedTags,
-    priceInitialized,
   ]);
 
-  const totalPages = Math.ceil((filteredProducts?.length || 0) / productsPerPage);
-  const startIndex = (currentPage - 1) * productsPerPage;
-  const paginatedProducts = Array.isArray(filteredProducts)
-    ? filteredProducts.slice(startIndex, startIndex + productsPerPage)
-    : [];
+  // Pagination
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct,
+  );
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
-  const handlePrevious = () => {
-    if (currentPage > 1) {
-      handlePageChange(currentPage - 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentPage < totalPages) {
-      handlePageChange(currentPage + 1);
-    }
-  };
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
   const clearFilters = () => {
     setSelectedCategory("all");
     setSearchTerm("");
+    setPriceRange([0, 1000]);
     setSelectedStock("all");
     setSelectedTags([]);
     setCurrentPage(1);
-    if (products.length > 0) {
-      const prices = products.map((p) => p.price);
-      const minPrice = Math.min(...prices);
-      const maxPrice = Math.max(...prices);
-      setPriceRange([minPrice, maxPrice]);
-    }
   };
+
+  const handleTagToggle = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const allTags = [...new Set(products.map((p) => p.category))].filter(Boolean);
 
   if (loading) {
     return (
@@ -263,7 +293,7 @@ const ProductsPage = () => {
           {/* Mobile Filter Toggle */}
           <div className="flex justify-between items-center mb-4 lg:hidden">
             <span className="text-gray-600 text-sm">
-              {(filteredProducts?.length || 0)} products found
+              {filteredProducts.length} products found
             </span>
             <Button
               color="light"
@@ -276,249 +306,276 @@ const ProductsPage = () => {
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Filters */}
           <aside
-            className={`${isSidebarOpen ? "block" : "hidden"} lg:block w-full lg:w-72 flex-shrink-0`}
+            className={`lg:w-64 flex-shrink-0 ${isSidebarOpen
+              ? "fixed inset-0 z-50 bg-white p-4 lg:static lg:p-0 lg:bg-transparent"
+              : "hidden lg:block"
+              }`}
           >
-            <Card>
-              <div className="p-5">
-                <div className="flex justify-between items-center mb-5">
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    Filters
-                  </h2>
-                  <Button
-                    color="light"
-                    size="xs"
-                    onClick={clearFilters}
-                  >
-                    Clear all
-                  </Button>
-                </div>
-
-                {/* Category Filter */}
-                <div className="mb-6">
-                  <Label className="mb-2 block font-medium text-gray-900">
-                    Category
-                  </Label>
-                  <Select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full"
-                  >
-                    <option value="all">All Categories</option>
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </Select>
-                </div>
-
-                <hr className="border-gray-100 my-5" />
-
-                {/* Price Range Filter */}
-                <div className="mb-6">
-                  <Label className="mb-3 block font-medium text-gray-900">
-                    Price Range
-                  </Label>
-                  <div className="px-1">
-                    <RangeSlider
-                      min={products.length > 0 ? Math.min(...products.map((p) => p.price)) : 0}
-                      max={products.length > 0 ? Math.max(...products.map((p) => p.price)) : 5000}
-                      value={priceRange[1]}
-                      onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                      className="mb-3"
-                    />
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>${priceRange[0]}</span>
-                      <span>${priceRange[1]}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <hr className="border-gray-100 my-5" />
-
-                {/* Stock Status Filter */}
-                <div className="mb-6">
-                  <Label className="mb-3 block font-medium text-gray-900">
-                    Stock Status
-                  </Label>
-                  <div className="space-y-2">
-                    {[
-                      { value: "all", label: "All Products" },
-                      { value: "in-stock", label: "In Stock" },
-                      { value: "backorder", label: "Backorder" },
-                    ].map((option) => (
-                      <div key={option.value} className="flex items-center gap-2">
-                        <Checkbox
-                          id={option.value}
-                          checked={selectedStock === option.value}
-                          onChange={() => setSelectedStock(option.value)}
-                        />
-                        <Label htmlFor={option.value} className="text-sm cursor-pointer">
-                          {option.label}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <hr className="border-gray-100 my-5" />
-
-                {/* Tags Filter */}
-                <div>
-                  <Label className="mb-3 block font-medium text-gray-900">
-                    Popular Tags
-                  </Label>
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map((tag) => (
-                      <Badge
-                        key={tag}
-                        color={selectedTags.includes(tag) ? "dark" : "light"}
-                        className="cursor-pointer"
-                        onClick={() => {
-                          setSelectedTags((prev) =>
-                            prev.includes(tag)
-                              ? prev.filter((t) => t !== tag)
-                              : [...prev, tag],
-                          );
-                        }}
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
+            {isSidebarOpen && (
+              <div className="flex justify-between items-center mb-6 lg:hidden">
+                <h2 className="text-lg font-semibold">Filters</h2>
+                <Button
+                  color="light"
+                  size="sm"
+                  onClick={() => setIsSidebarOpen(false)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
-            </Card>
-          </aside>
+            )}
 
-          {/* Product Grid */}
-          <main className="flex-1">
-            {/* Results count */}
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-gray-600 text-sm hidden lg:block">
-                {(filteredProducts?.length || 0)} product
-                {(filteredProducts?.length || 0) !== 1 ? "s" : ""} found
-              </span>
-              {isSidebarOpen && (
+            <div className="bg-white p-5 rounded-lg shadow-sm border border-gray-100 sticky top-4">
+              <div className="flex justify-between items-center mb-5">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  Filters
+                </h2>
                 <Button
                   color="light"
                   size="xs"
-                  onClick={() => setIsSidebarOpen(false)}
-                  className="lg:hidden"
-                >
-                  <X className="w-4 h-4 mr-1" />
-                  Close
-                </Button>
-              )}
-            </div>
-
-            {paginatedProducts.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg">
-                <Search className="w-12 h-12 mx-auto text-gray-300 mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No products found
-                </h3>
-                <p className="text-gray-500 text-sm mb-4">
-                  Try adjusting your filters or search terms
-                </p>
-                <Button
-                  color="dark"
-                  size="sm"
                   onClick={clearFilters}
                 >
-                  Clear Filters
+                  Clear all
                 </Button>
               </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                  {paginatedProducts.map((product) => (
-                    <div key={product.id} className="h-full">
-                      <ProductCard
-                        product={product}
-                        onAddToCart={() => addItem(product, 1)}
-                      />
-                    </div>
+
+              {/* Category Filter */}
+              <div className="mb-6">
+                <Label className="mb-2 block font-medium text-gray-900">
+                  Category
+                </Label>
+                <Select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full"
+                >
+                  <option value="all">All Categories</option>
+                  {categories.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
                   ))}
-                </div>
+                </Select>
+              </div>
 
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex justify-center items-center mt-8 gap-2">
-                    <Button
-                      color="light"
-                      size="sm"
-                      onClick={handlePrevious}
-                      disabled={currentPage === 1}
-                    >
-                      Previous
-                    </Button>
+              <hr className="border-gray-100 my-5" />
 
-                    <div className="flex items-center gap-1">
-                      {[...Array(totalPages)].map((_, index) => {
-                        const pageNum = index + 1;
-                        const isCurrentPage = pageNum === currentPage;
-
-                        if (
-                          pageNum !== 1 &&
-                          pageNum !== totalPages &&
-                          Math.abs(pageNum - currentPage) > 1
-                        ) {
-                          if (Math.abs(pageNum - currentPage) === 2) {
-                            return (
-                              <span key={pageNum} className="text-gray-400 px-2">
-                                ...
-                              </span>
-                            );
-                          }
-                          return null;
-                        }
-
-                        return (
-                          <Button
-                            key={pageNum}
-                            color={isCurrentPage ? "dark" : "light"}
-                            size="xs"
-                            onClick={() => handlePageChange(pageNum)}
-                            className="w-8 h-8"
-                          >
-                            {pageNum}
-                          </Button>
-                        );
-                      })}
-                    </div>
-
-                    <Button
-                      color="light"
-                      size="sm"
-                      onClick={handleNext}
-                      disabled={currentPage === totalPages}
-                    >
-                      Next
-                    </Button>
+              {/* Price Range Filter */}
+              <div className="mb-6">
+                <Label className="mb-3 block font-medium text-gray-900">
+                  Price Range: ${priceRange[0]} - ${priceRange[1]}
+                </Label>
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-xs text-gray-500">Min Price</Label>
+                    <TextInput
+                      type="number"
+                      value={priceRange[0]}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 0;
+                        setPriceRange([Math.min(val, priceRange[1]), priceRange[1]]);
+                      }}
+                      min={0}
+                      max={priceRange[1]}
+                      className="mt-1"
+                    />
                   </div>
-                )}
-
-                {/* Results Info */}
-                <div className="text-center mt-4 text-sm text-gray-500">
-                  Showing {startIndex + 1}-
-                  {Math.min(
-                    startIndex + productsPerPage,
-                    filteredProducts?.length || 0,
-                  )}{" "}
-                  of {filteredProducts?.length || 0} products
-                  {totalPages > 1 && (
-                    <span className="ml-2">
-                      | Page {currentPage} of {totalPages}
-                    </span>
-                  )}
+                  <div>
+                    <Label className="text-xs text-gray-500">Max Price</Label>
+                    <TextInput
+                      type="number"
+                      value={priceRange[1]}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value) || 1000;
+                        setPriceRange([priceRange[0], Math.max(val, priceRange[0])]);
+                      }}
+                      min={priceRange[0]}
+                      className="mt-1"
+                    />
+                  </div>
                 </div>
-              </>
+                <p className="text-xs text-gray-500 mt-2">
+                  Product prices range: ${productPriceRange[0]} - ${productPriceRange[1]}
+                </p>
+              </div>
+
+              <hr className="border-gray-100 my-5" />
+
+              {/* Stock Filter */}
+              <div className="mb-6">
+                <Label className="mb-3 block font-medium text-gray-900">
+                  Availability
+                </Label>
+                <Select
+                  value={selectedStock}
+                  onChange={(e) => setSelectedStock(e.target.value)}
+                  className="w-full"
+                >
+                  <option value="all">All Items</option>
+                  <option value="in-stock">In Stock</option>
+                  <option value="backorder">Out of Stock</option>
+                </Select>
+              </div>
+
+              {/* Tags Filter */}
+              {allTags.length > 0 && (
+                <>
+                  <hr className="border-gray-100 my-5" />
+                  <div className="mb-6">
+                    <Label className="mb-3 block font-medium text-gray-900">
+                      Categories
+                    </Label>
+                    <div className="space-y-2">
+                      {allTags.map((tag) => (
+                        <div key={tag} className="flex items-center">
+                          <Checkbox
+                            id={`tag-${tag}`}
+                            checked={selectedTags.includes(tag)}
+                            onChange={() => handleTagToggle(tag)}
+                          />
+                          <Label
+                            htmlFor={`tag-${tag}`}
+                            className="ml-2 text-sm text-gray-700"
+                          >
+                            {tag}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Mobile Apply Button */}
+              <div className="lg:hidden mt-6">
+                <Button
+                  color="dark"
+                  className="w-full"
+                  onClick={() => setIsSidebarOpen(false)}
+                >
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </aside>
+
+          {/* Product Grid */}
+          <div className="flex-1">
+            {/* Results Count */}
+            <div className="flex flex-wrap justify-between items-center mb-6">
+              <p className="text-gray-600">
+                Showing <span className="font-semibold text-gray-900">{filteredProducts.length}</span> products
+                {filteredProducts.length > 0 && (
+                  <span className="text-gray-500 ml-1">
+                    (page {currentPage} of {totalPages})
+                  </span>
+                )}
+              </p>
+
+              {/* Active Filters */}
+              <div className="flex flex-wrap gap-2 mt-2 sm:mt-0">
+                {selectedCategory !== "all" && (
+                  <Badge color="info" className="flex items-center gap-1">
+                    {selectedCategory}
+                    <button onClick={() => setSelectedCategory("all")} className="hover:text-red-500">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                )}
+                {(priceRange[0] !== 0 || priceRange[1] !== 1000) && (
+                  <Badge color="info" className="flex items-center gap-1">
+                    ${priceRange[0]} - ${priceRange[1]}
+                    <button onClick={() => setPriceRange([0, 1000])} className="hover:text-red-500">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                )}
+                {selectedStock !== "all" && (
+                  <Badge color="info" className="flex items-center gap-1">
+                    {selectedStock === "in-stock" ? "In Stock" : "Out of Stock"}
+                    <button onClick={() => setSelectedStock("all")} className="hover:text-red-500">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            {/* Products Grid */}
+            {currentProducts.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {currentProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onAddToCart={() => addItem(product, 1)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-white rounded-lg">
+                <p className="text-gray-500 text-lg mb-2">No products found</p>
+                <p className="text-gray-400 text-sm mb-6">Try adjusting your filters</p>
+                <Button color="light" onClick={clearFilters}>
+                  Clear all filters
+                </Button>
+              </div>
             )}
-          </main>
+
+            {/* Pagination */}
+            {filteredProducts.length > 0 && totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-10">
+                <Button
+                  color="light"
+                  size="sm"
+                  onClick={() => paginate(currentPage - 1)}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+
+                <div className="flex gap-1">
+                  {[...Array(totalPages)].map((_, i) => {
+                    const pageNum = i + 1;
+                    // Show first page, last page, current page, and pages around current
+                    if (
+                      pageNum === 1 ||
+                      pageNum === totalPages ||
+                      (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                    ) {
+                      return (
+                        <Button
+                          key={pageNum}
+                          color={currentPage === pageNum ? "dark" : "light"}
+                          size="sm"
+                          onClick={() => paginate(pageNum)}
+                          className="min-w-[40px]"
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    }
+                    // Show ellipsis
+                    if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                      return <span key={pageNum} className="px-2 text-gray-400">...</span>;
+                    }
+                    return null;
+                  })}
+                </div>
+
+                <Button
+                  color="light"
+                  size="sm"
+                  onClick={() => paginate(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

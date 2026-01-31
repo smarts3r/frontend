@@ -4,7 +4,7 @@ import type { AuthResponse, User } from "@/types/api";
 
 interface AuthStore {
   user: User | null;
-  token: string | null;
+  accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
   login: (authResponse: AuthResponse) => void;
@@ -16,13 +16,13 @@ export const useAuthStore = create<AuthStore>()(
   persist(
     (set) => ({
       user: null,
-      token: null,
+      accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
       login: (authResponse) => {
         set({
           user: authResponse.user,
-          token: authResponse.token,
+          accessToken: authResponse.accessToken,
           refreshToken: authResponse.refreshToken,
           isAuthenticated: true,
         });
@@ -30,7 +30,7 @@ export const useAuthStore = create<AuthStore>()(
       logout: () => {
         set({
           user: null,
-          token: null,
+          accessToken: null,
           refreshToken: null,
           isAuthenticated: false,
         });

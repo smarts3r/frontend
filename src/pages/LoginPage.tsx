@@ -1,16 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Eye,
-  EyeOff,
-  Smartphone,
-  Laptop,
-  Headphones,
-  ArrowRight,
-  Mail,
-  Lock,
-  Chrome,
-  Facebook,
-} from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -62,14 +51,17 @@ export default function LoginPage() {
         loginIdentifier: data.email,
         password: data.password,
       });
+
       login(response.data);
       toast.success(t("loginPage.welcomeBackMessage"));
       navigate("/home");
     } catch (error) {
-      console.error("Login Error:", error);
-      const errorMessage = error instanceof Error && 'response' in error 
-        ? (error as { response?: { data?: { message?: string } } }).response?.data?.message 
-        : t("loginPage.loginFailed");
+      const errorMessage =
+        error instanceof Error && "response" in error
+          ? (error as { response?: { data?: { message?: string } } })
+              .response?.data?.message
+          : t("loginPage.loginFailed");
+
       toast.error(errorMessage || t("loginPage.loginFailed"));
     } finally {
       setIsLoading(false);
@@ -77,70 +69,37 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
-      {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-gray-900 to-gray-800 relative flex-col justify-between p-12 text-white">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550009158-9ebf69173e03?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')] bg-cover bg-center opacity-20" />
-        
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 text-2xl font-bold">
-            <div className="p-2 bg-blue-600 rounded-lg">
-              <Smartphone className="w-6 h-6" />
-            </div>
-            <span>Smart S3r</span>
-          </div>
-        </div>
+    <div
+      className="relative min-h-screen w-full flex items-center justify-center bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage:
+          "url('https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=2000&q=80')",
+      }}
+    >
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/40" />
 
-        <div className="relative z-10 max-w-lg">
-          <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
-            Welcome Back to Smart S3r
-          </h1>
-          <p className="text-lg text-gray-300 mb-8">
-            Sign in to access your orders, wishlist, and exclusive deals.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg text-sm">
-              <Laptop className="w-4 h-4" /> Latest Laptops
-            </div>
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg text-sm">
-              <Headphones className="w-4 h-4" /> Premium Audio
-            </div>
-          </div>
-        </div>
-
-        <div className="relative z-10 text-sm text-gray-400">
-          © 2024 Smart S3r. All rights reserved.
-        </div>
-      </div>
-
-      {/* Right Side - Login Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-4 sm:p-6 lg:p-8">
-        {/* Mobile Header */}
-        <div className="lg:hidden w-full max-w-md mb-6 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 bg-blue-100 rounded-2xl">
-              <Smartphone className="w-8 h-8 text-blue-600" />
-            </div>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900">Smart S3r</h1>
-          <p className="text-sm text-gray-500">Sign in to your account</p>
-        </div>
-
-        <Card className="w-full max-w-md shadow-lg">
-          <div className="p-6 sm:p-8">
-            <div className="hidden lg:block mb-6">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                Sign In
-              </h2>
-              <p className="mt-2 text-gray-600">
-                Enter your credentials to access your account
+      {/* Card Wrapper */}
+      <div className="relative z-10 w-full max-w-md px-4">
+        <Card className="bg-white/90 backdrop-blur-sm shadow-2xl border-0">
+          {/* ✅ Card Padding متظبط هنا */}
+          <div className="p-8 sm:p-10">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Welcome Back
+              </h1>
+              <p className="text-gray-600">
+                Sign in to your Smart S3r account
               </p>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              {/* Email Field */}
+              {/* Email */}
               <div>
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email" className="mb-2 block">
+                  Email Address
+                </Label>
                 <TextInput
                   id="email"
                   type="email"
@@ -150,13 +109,18 @@ export default function LoginPage() {
                   {...register("email")}
                 />
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.email.message}
+                  </p>
                 )}
               </div>
 
-              {/* Password Field */}
+              {/* Password */}
               <div>
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="mb-2 block">
+                  Password
+                </Label>
+
                 <div className="relative">
                   <TextInput
                     id="password"
@@ -164,12 +128,14 @@ export default function LoginPage() {
                     placeholder="••••••••"
                     icon={Lock}
                     color={errors.password ? "failure" : "gray"}
+                    className="pr-12"
                     {...register("password")}
                   />
+
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
                     onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
                   >
                     {showPassword ? (
                       <EyeOff className="w-5 h-5" />
@@ -178,12 +144,15 @@ export default function LoginPage() {
                     )}
                   </button>
                 </div>
+
                 {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
 
-              {/* Remember Me & Forgot Password */}
+              {/* Remember & Forgot */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <Checkbox
@@ -195,6 +164,7 @@ export default function LoginPage() {
                     Remember me
                   </Label>
                 </div>
+
                 <Link
                   to="/forgot-password"
                   className="text-sm font-medium text-blue-600 hover:underline"
@@ -203,17 +173,16 @@ export default function LoginPage() {
                 </Link>
               </div>
 
-              {/* Submit Button */}
+              {/* Submit */}
               <Button
                 type="submit"
-                color="dark"
                 size="lg"
-                className="w-full"
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white border-0"
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <>
-                    <Spinner className="mr-2" />
+                    <Spinner size="sm" className="mr-2" />
                     Signing in...
                   </>
                 ) : (
@@ -224,29 +193,8 @@ export default function LoginPage() {
                 )}
               </Button>
 
-              {/* Divider */}
-              <div className="relative flex items-center py-2">
-                <div className="flex-grow border-t border-gray-200"></div>
-                <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">
-                  Or continue with
-                </span>
-                <div className="flex-grow border-t border-gray-200"></div>
-              </div>
-
-              {/* Social Login */}
-              <div className="grid grid-cols-2 gap-3">
-                <Button color="light" size="sm" className="w-full">
-                  <Chrome className="w-4 h-4 mr-2" />
-                  Google
-                </Button>
-                <Button color="light" size="sm" className="w-full">
-                  <Facebook className="w-4 h-4 mr-2" />
-                  Facebook
-                </Button>
-              </div>
-
-              {/* Register Link */}
-              <p className="text-center text-sm text-gray-600 pt-2">
+              {/* Register */}
+              <p className="text-center text-sm text-gray-600 pt-4">
                 Don't have an account?{" "}
                 <Link
                   to="/register"

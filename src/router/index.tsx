@@ -1,6 +1,9 @@
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
+import AdminLayout from "@/components/admin/AdminLayout";
 import AboutPage from "@/pages/AboutPage";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminOrdersPage from "@/pages/admin/AdminOrdersPage";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import CartPage from "@/pages/CartPage";
 import CheckoutPage from "@/pages/CheckoutPage";
@@ -72,8 +75,34 @@ export const router = createBrowserRouter([
         element: <OrdersPage />,
       },
       {
-        path: "ADMIN",
+        path: "admin",
         element: <AdminDashboardPage />,
+      },
+    ],
+  },
+  {
+    path: "/admin",
+    element: <AdminLayout />,
+    children: [
+      {
+        index: true,
+        element: <AdminDashboard />,
+      },
+      {
+        path: "orders",
+        element: <AdminOrdersPage />,
+      },
+      {
+        path: "products",
+        element: <AdminDashboard />,
+      },
+      {
+        path: "users",
+        element: <AdminDashboard />,
+      },
+      {
+        path: "settings",
+        element: <AdminDashboard />,
       },
     ],
   },

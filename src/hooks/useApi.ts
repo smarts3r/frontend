@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
+import { useAuthStore } from '@/store/authStore';
 
-// Define types for API requests
+
 export interface ApiResponse<T> {
   data: T;
   status: number;
@@ -12,7 +13,7 @@ export interface ApiError {
   code?: string;
 }
 
-// Base API hook with loading, error, and retry functionality
+
 export function useApi<T>() {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -26,8 +27,10 @@ export function useApi<T>() {
     setError(null);
 
     try {
-      // In test environment, use relative URLs for MSW to intercept
-      // In production, use full URLs with base URL
+
+      const accessToken = useAuthStore.getState().accessToken;
+
+
       let url: string;
       if (import.meta.env.NODE_ENV === 'test') {
         url = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
@@ -45,12 +48,11 @@ export function useApi<T>() {
         ...options,
       };
 
-      // Add authentication token if available
-      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
-      if (token) {
+
+      if (accessToken) {
         const headers = new Headers(config.headers);
         if (!headers.has('Authorization')) {
-          headers.set('Authorization', `Bearer ${token}`);
+          headers.set('Authorization', `Bearer ${accessToken}`);
         }
         config.headers = headers;
       }
@@ -79,7 +81,18 @@ export function useApi<T>() {
       const contentType = response.headers.get('content-type');
 
       if (contentType?.includes('application/json')) {
-        result = await response.json();
+        const jsonResponse = await response.json();
+        
+        // Smart Response Wrapper: Check if response is wrapped format
+        if (jsonResponse && 
+            typeof jsonResponse === 'object' && 
+            'success' in jsonResponse && 
+            'data' in jsonResponse && 
+            jsonResponse.success === true) {
+          result = jsonResponse.data as T;
+        } else {
+          result = jsonResponse as T;
+        }
       } else if (contentType?.includes('text/')) {
         // For text responses, cast to T which should be string or compatible type
         const textResult = await response.text();
