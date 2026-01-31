@@ -1,8 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, Badge } from "flowbite-react";
 
 export const HeroSection: React.FC = () => {
   const { t } = useTranslation();
@@ -21,7 +20,7 @@ export const HeroSection: React.FC = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Content Side */}
           <div className="space-y-8">
-            <Badge className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 text-sm rounded-full font-medium w-fit shadow-md transition-all duration-300">
+            <Badge color="blue" className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2 text-sm rounded-full font-medium w-fit shadow-md transition-all duration-300">
               {t("homePage.hero.badge")}
             </Badge>
 
@@ -37,6 +36,7 @@ export const HeroSection: React.FC = () => {
               <Link to="/products" className="flex-1 sm:flex-none">
                 <Button
                   size="lg"
+                  color="blue"
                   className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 h-14 text-lg rounded-full shadow-lg hover:shadow-blue-500/25 transition-all duration-300 transform hover:scale-105"
                 >
                   {t("homePage.hero.ctaPrimary")}
@@ -47,7 +47,8 @@ export const HeroSection: React.FC = () => {
               <Link to="/offers" className="flex-1 sm:flex-none">
                 <Button
                   size="lg"
-                  variant="outline"
+                  outline
+                  color="blue"
                   className="w-full sm:w-auto border-blue-300 text-blue-700 bg-white/80 backdrop-blur-sm hover:bg-blue-50 hover:border-blue-400 h-14 text-lg rounded-full transition-all duration-300 transform hover:scale-105"
                 >
                   {t("homePage.hero.ctaSecondary")}

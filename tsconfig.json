@@ -1,5 +1,4 @@
 {
-  "extends": "../../tsconfig.json",
   "files": [],
   "references": [
     {
@@ -12,8 +11,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@smarts3r/shared": ["../../packages/shared/src"]
+      "@/*": ["./src/*"]
     }
   }
 }

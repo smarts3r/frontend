@@ -10,8 +10,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button, TextInput } from "flowbite-react";
 
 export const Footer: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -50,7 +49,7 @@ export const Footer: React.FC = () => {
                 Subscribe to Our Newsletter
               </h4>
               <form onSubmit={handleNewsletterSubmit} className="flex gap-2">
-                <Input
+                <TextInput
                   type="email"
                   placeholder="Enter your email"
                   value={email}
@@ -60,6 +59,7 @@ export const Footer: React.FC = () => {
                 />
                 <Button
                   type="submit"
+                  color="blue"
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 rounded-r-full px-4"
                 >
                   <Send className="w-4 h-4" />

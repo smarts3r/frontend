@@ -151,12 +151,11 @@ const ProductsPage = () => {
   ]);
 
   // Pagination calculations
-  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+  const totalPages = Math.ceil((filteredProducts?.length || 0) / productsPerPage);
   const startIndex = (currentPage - 1) * productsPerPage;
-  const paginatedProducts = filteredProducts.slice(
-    startIndex,
-    startIndex + productsPerPage,
-  );
+  const paginatedProducts = Array.isArray(filteredProducts)
+    ? filteredProducts.slice(startIndex, startIndex + productsPerPage)
+    : [];
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -256,7 +255,7 @@ const ProductsPage = () => {
           {/* Filter Toggle for Mobile */}
           <div className="flex justify-between items-center mb-6 lg:hidden">
             <span className="text-gray-700">
-              {filteredProducts.length} products found
+              {(filteredProducts?.length || 0)} products found
             </span>
             <Button
               variant="outline"
@@ -423,8 +422,8 @@ const ProductsPage = () => {
             {/* Results count and mobile filter close */}
             <div className="flex justify-between items-center mb-6">
               <span className="text-gray-700 hidden lg:block">
-                {filteredProducts.length} product
-                {filteredProducts.length !== 1 ? "s" : ""} found
+                {(filteredProducts?.length || 0)} product
+                {(filteredProducts?.length || 0) !== 1 ? "s" : ""} found
               </span>
               {isSidebarOpen && (
                 <Button
@@ -532,9 +531,9 @@ const ProductsPage = () => {
                   Showing {startIndex + 1}-
                   {Math.min(
                     startIndex + productsPerPage,
-                    filteredProducts.length,
+                    filteredProducts?.length || 0,
                   )}{" "}
-                  of {filteredProducts.length} products
+                  of {filteredProducts?.length || 0} products
                   {totalPages > 1 && (
                     <span className="ml-2">
                       | Page {currentPage} of {totalPages}

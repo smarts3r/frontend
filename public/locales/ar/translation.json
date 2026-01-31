@@ -171,7 +171,8 @@
     "smartS3rBringsYou": "سمارت سيفر يجلب لك أحدث الأجهزة بأسعار لا تضاهى وتوصيل سريع.",
     "latestLaptops": "أحدث أجهزة الكمبيوتر المحمولة",
     "premiumAudio": "صوت عالي الجودة",
-    "copyright": "© 2026 سمارت سيفر Inc. جميع الحقوق محفوظة."
+    "copyright": "© 2026 سمارت سيفر Inc. جميع الحقوق محفوظة.",
+    "signingIn": ""
   },
   "registerPage": {
     "createAccount": "إنشاء حساب",

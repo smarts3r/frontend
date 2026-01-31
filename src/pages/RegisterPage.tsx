@@ -3,10 +3,11 @@ import {
   ArrowRight,
   Eye,
   EyeOff,
-  Loader2,
   Shield,
   Smartphone,
   Zap,
+  Laptop,
+  Check
 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -14,16 +15,15 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+  Button,
+  TextInput,
+  Checkbox,
+  Label,
+  Alert,
+  Spinner,
+  Card
+} from "flowbite-react";
 import api from "@/services/api";
 import { useAuthStore } from "@/store/authStore";
 
@@ -32,6 +32,8 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
 
@@ -49,7 +51,11 @@ export default function RegisterPage() {
 
   type RegisterFormValues = z.infer<typeof registerSchema>;
 
-  const form = useForm<RegisterFormValues>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: "",
@@ -60,7 +66,14 @@ export default function RegisterPage() {
   });
 
   const onSubmit = async (data: RegisterFormValues) => {
+    if (!agreeTerms) {
+      toast.error(t("registerPage.agreeTermsError"));
+      return;
+    }
+
     setIsLoading(true);
+    setError(null);
+
     try {
       const response = await api.post("/auth/register", {
         name: data.name,
@@ -68,204 +81,237 @@ export default function RegisterPage() {
         password: data.password,
       });
       login(response.data);
-      toast.success("Account created successfully!");
+      toast.success(t("registerPage.successMessage"));
       navigate("/home");
     } catch (error: any) {
       console.error("Registration Error:", error);
-      toast.error(error.response?.data?.message || "Registration failed");
+      const errorMessage = error.response?.data?.message || t("registerPage.registrationFailed");
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="w-full h-screen flex overflow-hidden">
-      {/* Left Side - Visual Branding */}
-      <div className="hidden lg:flex w-1/2 bg-gray-900 relative flex-col justify-between p-12 text-white">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550009158-9ebf69173e03?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')] bg-cover bg-center opacity-40 mix-blend-overlay" />
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/90 to-purple-900/90" />
+    <div className="flex min-h-screen w-full bg-gray-50 text-gray-900">
 
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 text-2xl font-bold tracking-tighter">
-            <Zap className="w-8 h-8 text-cyan-400" />
-            Smart S3r
+      {/* Left Side - Visual Branding (Desktop Only) - Fixed Height */}
+      <div className="hidden lg:flex lg:w-1/2 bg-blue-600 relative flex-col justify-between p-12 text-white overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-700 z-0" />
+        <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:20px_20px]" />
+
+        {/* Brand Logo */}
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="p-2.5 bg-white/10 backdrop-blur-md rounded-xl border border-white/20">
+            <Zap className="w-6 h-6 text-yellow-300 fill-yellow-300" />
           </div>
+          <span className="text-2xl font-bold tracking-tight">Smart S3r</span>
         </div>
 
-        <div className="relative z-10 max-w-lg">
-          <h1 className="text-5xl font-extrabold tracking-tight mb-6 leading-tight">
-            {t("registerPage.theFutureOfTechIsHere")}
+        {/* Hero Content */}
+        <div className="relative z-10 max-w-lg mt-auto mb-20">
+          <h1 className="text-5xl font-extrabold mb-6 leading-tight tracking-tight">
+            {t("registerPage.theFutureOfTechIsHere", "Join the Future of Tech")}
           </h1>
-          <p className="text-lg text-gray-300 mb-8">
-            {t("registerPage.experienceNextGen")}
-            {t("registerPage.smartS3rBringsYou")}
+          <p className="text-lg text-blue-100 mb-8 leading-relaxed font-medium opacity-90">
+            {t("registerPage.experienceNextGen", "Create an account to unlock exclusive deals, track orders, and experience next-gen shopping.")}
           </p>
-          <div className="flex gap-4 text-sm text-gray-400">
-            <div className="flex items-center gap-2">
-              <Smartphone className="w-4 h-4" />{" "}
-              {t("registerPage.latestLaptops")}
-            </div>
-            <div className="flex items-center gap-2">
-              <Shield className="w-4 h-4" /> {t("registerPage.premiumAudio")}
-            </div>
+
+          <div className="flex gap-3">
+            {[
+              { icon: Laptop, text: "Latest Tech" },
+              { icon: Shield, text: "Secure" },
+              { icon: Smartphone, text: "Mobile Ready" }
+            ].map((item, idx) => (
+              <div key={idx} className="flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/10 px-4 py-2 rounded-full text-sm font-medium">
+                <item.icon className="w-4 h-4" />
+                <span>{item.text}</span>
+              </div>
+            ))}
           </div>
         </div>
 
-        <div className="relative z-10 text-sm text-gray-400">
-          {t("registerPage.copyright")}
+        {/* Copyright */}
+        <div className="relative z-10 text-sm text-blue-200 opacity-60">
+          © 2024 Smart S3r. All rights reserved.
         </div>
       </div>
 
       {/* Right Side - Registration Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-background">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight">
-              {t("registerPage.createAccount")}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-4 sm:p-6 lg:p-8 bg-white overflow-y-auto">
+
+        {/* Mobile Header (Only visible on mobile) */}
+        <div className="lg:hidden w-full max-w-md mb-8 text-center">
+          <div className="flex justify-center mb-4">
+            <div className="p-3 bg-blue-50 rounded-2xl">
+              <Zap className="w-8 h-8 text-blue-600 fill-blue-600" />
+            </div>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">Smart S3r</h1>
+          <p className="text-sm text-gray-500">Create your account to get started</p>
+        </div>
+
+        <div className="w-full max-w-md space-y-6">
+          <div className="hidden lg:block mb-8">
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
+              {t("registerPage.createAccount", "Create an account")}
             </h2>
-            <p className="text-muted-foreground mt-2">
-              {t("registerPage.pleaseEnterDetails")}
+            <p className="mt-2 text-gray-500">
+              {t("registerPage.pleaseEnterDetails", "Enter your details below to create your account")}
             </p>
           </div>
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("registerPage.name")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("registerPage.namePlaceholder")}
-                        className="h-11"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("loginPage.email")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("registerPage.emailPlaceholder")}
-                        className="h-11"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("loginPage.password")}</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          type={showPassword ? "text" : "password"}
-                          placeholder={t("registerPage.passwordPlaceholder")}
-                          className="h-11 pr-10"
-                          {...field}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-muted-foreground"
-                          onClick={() => setShowPassword(!showPassword)}
-                        >
-                          {showPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("registerPage.confirmPassword")}</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          type={showConfirmPassword ? "text" : "password"}
-                          placeholder={t(
-                            "registerPage.confirmPasswordPlaceholder",
-                          )}
-                          className="h-11 pr-10"
-                          {...field}
-                        />
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-muted-foreground"
-                          onClick={() =>
-                            setShowConfirmPassword(!showConfirmPassword)
-                          }
-                        >
-                          {showConfirmPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          {error && (
+            <Alert color="failure" icon={Shield} className="animate-pulse">
+              <span className="font-medium">Error:</span> {error}
+            </Alert>
+          )}
 
-              <Button
-                type="submit"
-                className="w-full h-11 text-base bg-cyan-600 hover:bg-cyan-700 transition-all font-semibold shadow-lg hover:shadow-xl"
-                disabled={isLoading}
-              >
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t("registerPage.createAccountButton")}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </form>
-          </Form>
-
-          <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+            {/* Name Field */}
+            <div>
+              <div className="mb-2 block">
+                <Label htmlFor="name" value={t("registerPage.name", "Full Name")} />
+              </div>
+              <TextInput
+                id="name"
+                type="text"
+                placeholder="John Doe"
+                color={errors.name ? "failure" : "gray"}
+                helperText={errors.name?.message}
+                {...register("name")}
+                shadow
+              />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                {t("registerPage.alreadyHaveAccount")}
-              </span>
-            </div>
-          </div>
 
-          <div className="text-center text-sm">
-            <Link
-              to="/login"
-              className="text-cyan-600 font-bold hover:underline"
+            {/* Email Field */}
+            <div>
+              <div className="mb-2 block">
+                <Label htmlFor="email" value={t("loginPage.email", "Email Address")} />
+              </div>
+              <TextInput
+                id="email"
+                type="email"
+                placeholder="name@company.com"
+                color={errors.email ? "failure" : "gray"}
+                helperText={errors.email?.message}
+                {...register("email")}
+                shadow
+              />
+            </div>
+
+            {/* Password Field */}
+            <div>
+              <div className="mb-2 block">
+                <Label htmlFor="password" value={t("loginPage.password", "Password")} />
+              </div>
+              <div className="relative">
+                <TextInput
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  color={errors.password ? "failure" : "gray"}
+                  helperText={errors.password?.message}
+                  {...register("password")}
+                  shadow
+                />
+                <button
+                  type="button"
+                  className="absolute top-[10px] right-3 text-gray-400 hover:text-blue-600 transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password Field */}
+            <div>
+              <div className="mb-2 block">
+                <Label htmlFor="confirmPassword" value={t("registerPage.confirmPassword", "Confirm Password")} />
+              </div>
+              <div className="relative">
+                <TextInput
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  color={errors.confirmPassword ? "failure" : "gray"}
+                  helperText={errors.confirmPassword?.message}
+                  {...register("confirmPassword")}
+                  shadow
+                />
+                <button
+                  type="button"
+                  className="absolute top-[10px] right-3 text-gray-400 hover:text-blue-600 transition-colors"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Password Strength/Reqs (Simplified UI) */}
+            <div className="text-xs text-gray-500 space-y-1 bg-gray-50 p-3 rounded-lg border border-gray-100">
+              <p className="font-medium text-gray-700 mb-1">Password must have:</p>
+              <div className="flex gap-4">
+                <span className="flex items-center gap-1">
+                  <div className="w-1 h-1 bg-gray-400 rounded-full"></div> 6+ chars
+                </span>
+                <span className="flex items-center gap-1">
+                  <div className="w-1 h-1 bg-gray-400 rounded-full"></div> Uppercase
+                </span>
+                <span className="flex items-center gap-1">
+                  <div className="w-1 h-1 bg-gray-400 rounded-full"></div> Number
+                </span>
+              </div>
+            </div>
+
+            {/* Terms Checkbox */}
+            <div className="flex items-start gap-2 mt-2">
+              <Checkbox
+                id="agree"
+                checked={agreeTerms}
+                onChange={(e) => setAgreeTerms(e.target.checked)}
+                className="text-blue-600 focus:ring-blue-600 mt-0.5"
+              />
+              <Label htmlFor="agree" className="text-sm text-gray-500 font-normal leading-tight">
+                I agree to the <Link to="/terms" className="text-blue-600 hover:underline">Terms of Service</Link> and <Link to="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>.
+              </Label>
+            </div>
+
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              color="blue"
+              size="lg"
+              disabled={isLoading || !agreeTerms}
+              isProcessing={isLoading}
+              className="w-full mt-2"
             >
-              {t("registerPage.signIn")}
-            </Link>
-          </div>
+              {t("registerPage.createAccountButton", "Create Account")}
+              {!isLoading && <ArrowRight className="ml-2 w-4 h-4" />}
+            </Button>
+
+            {/* Divider */}
+            <div className="relative flex items-center py-2">
+              <div className="flex-grow border-t border-gray-200"></div>
+              <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">Or</span>
+              <div className="flex-grow border-t border-gray-200"></div>
+            </div>
+
+            {/* Sign In Link */}
+            <p className="text-center text-sm text-gray-600">
+              {t("registerPage.alreadyHaveAccount", "Already have an account?")}{" "}
+              <Link
+                to="/login"
+                className="font-semibold text-blue-600 hover:text-blue-700 hover:underline transition-all"
+              >
+                {t("registerPage.signIn", "Log in")}
+              </Link>
+            </p>
+          </form>
         </div>
       </div>
     </div>

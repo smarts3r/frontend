@@ -1,7 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: ["class"],
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./node_modules/flowbite/**/*.js"
+  ],
   theme: {
     extend: {
       colors: {
@@ -53,6 +56,6 @@ export default {
   },
   plugins: [
     require("tailwindcss-animate"),
-    // Note: line-clamp functionality will be handled with CSS instead
+    require("flowbite/plugin"),
   ],
 };

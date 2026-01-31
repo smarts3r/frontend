@@ -4,22 +4,22 @@ import { api } from "./api";
 export const productService = {
   getAll: async (): Promise<Product[]> => {
     const response = await api.get("/products");
-    return response.data;
+    return response.data.data || response.data;
   },
 
   getById: async (id: number): Promise<Product> => {
     const response = await api.get(`/products/${id}`);
-    return response.data;
+    return response.data.data || response.data;
   },
 
   create: async (product: Omit<Product, "id">): Promise<Product> => {
     const response = await api.post("/products", product);
-    return response.data;
+    return response.data.data || response.data;
   },
 
   update: async (id: number, product: Partial<Product>): Promise<Product> => {
     const response = await api.put(`/products/${id}`, product);
-    return response.data;
+    return response.data.data || response.data;
   },
 
   delete: async (id: number): Promise<void> => {
@@ -30,7 +30,16 @@ export const productService = {
 export const categoryService = {
   getAll: async (): Promise<string[]> => {
     const response = await api.get("/categories");
-    return response.data;
+    // Handle both direct array response and wrapped response
+    const data = response.data.data || response.data;
+
+    // If data is an array of objects with name property, extract names
+    if (Array.isArray(data) && data.length > 0 && typeof data[0] === 'object' && data[0].name) {
+      return data.map((item: any) => item.name);
+    }
+
+    // Otherwise return as is
+    return data;
   },
 };
 

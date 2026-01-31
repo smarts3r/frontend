@@ -37,7 +37,8 @@ export const FeaturedProducts: React.FC = () => {
       try {
         const data = await productService.getAll();
         // Take first 8 products for featured section
-        setProducts(data.slice(0, 8));
+        const productsArray = Array.isArray(data) ? data : [];
+        setProducts(productsArray.slice(0, 8));
       } catch (error) {
         console.error("Failed to fetch products:", error);
       } finally {

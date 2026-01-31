@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -26,7 +29,6 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-toast": "^1.2.15",
-    "@smarts3r/shared": "workspace:*",
     "@tailwindcss/postcss": "^4.1.18",
     "@types/axios": "^0.9.36",
     "@types/i18next": "^13.0.0",
@@ -36,6 +38,8 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",
+    "flowbite": "^4.0.1",
+    "flowbite-react": "^0.12.16",
     "i18next": "^25.8.0",
     "i18next-browser-languagedetector": "^8.2.0",
     "i18next-http-backend": "^3.0.2",
@@ -55,20 +59,28 @@
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@tailwindcss/typography": "^0.5.19",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "@vitest/ui": "^4.0.18",
     "autoprefixer": "^10.4.23",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "jsdom": "^27.4.0",
+    "msw": "^2.12.7",
+    "node-fetch": "^3.3.2",
     "postcss": "^8.5.6",
     "shadcn": "^3.7.0",
     "tailwindcss": "^4.1.18",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "vitest": "^4.0.18"
   }
 }

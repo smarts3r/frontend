@@ -99,15 +99,17 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
               <ShoppingCart className="w-4 h-4 mr-2" />
               Quick Add
             </Button>
-            <Link to={`/products/${product.id}`}>
-              <Button
-                size="sm"
-                variant="outline"
-                className="shadow-lg bg-white/90 hover:bg-white hover:scale-105 transition-all duration-200 rounded-full px-4 py-2 text-xs font-medium"
-              >
-                <Eye className="w-4 h-4" />
-              </Button>
-            </Link>
+            <Button
+              size="sm"
+              variant="outline"
+              className="shadow-lg bg-white/90 hover:bg-white hover:scale-105 transition-all duration-200 rounded-full px-4 py-2 text-xs font-medium"
+              onClick={(e) => {
+                e.preventDefault();
+                window.location.href = `/products/${product.id}`;
+              }}
+            >
+              <Eye className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </Link>
