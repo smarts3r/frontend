@@ -107,3 +107,33 @@ export const useToggleWishlist = () => {
 
   return { data, loading, error, toggleWishlist, reset };
 };
+
+// Profile update hook
+export const useUpdateUserProfile = () => {
+  const { data, loading, error, execute, reset } = usePut<UserProfile>();
+
+  const updateUserProfile = useCallback(async (profileData: Partial<UserProfile>) => {
+    return execute('/api/user/profile', profileData);
+  }, [execute]);
+
+  return { data, loading, error, updateUserProfile, reset };
+};
+
+// Address update hook
+export interface UserAddress {
+  address?: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
+  country?: string;
+}
+
+export const useUpdateUserAddress = () => {
+  const { data, loading, error, execute, reset } = usePut<UserAddress>();
+
+  const updateUserAddress = useCallback(async (addressData: UserAddress) => {
+    return execute('/api/user/address', addressData);
+  }, [execute]);
+
+  return { data, loading, error, updateUserAddress, reset };
+};
