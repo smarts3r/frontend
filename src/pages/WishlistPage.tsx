@@ -1,16 +1,22 @@
-import { Heart, ShoppingCart, Star, Trash2 } from "lucide-react";
+import { Heart, ShoppingCart, Star, Trash2, ArrowLeft, Package } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Badge,
+  Button,
+  Card,
+  Spinner,
+} from "flowbite-react";
+import { toast } from "sonner";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
+import { useCurrencyFormat } from "@/lib/currency";
 
 export default function WishlistPage() {
   const navigate = useNavigate();
   const { items, removeItem, clearWishlist } = useWishlistStore();
   const { addItem } = useCartStore();
+  const formatCurrency = useCurrencyFormat();
 
   const [isRemoving, setIsRemoving] = useState<number | null>(null);
   const [isAddingToCart, setIsAddingToCart] = useState<number | null>(null);
@@ -20,6 +26,7 @@ export default function WishlistPage() {
     try {
       await new Promise((resolve) => setTimeout(resolve, 300));
       removeItem(productId);
+      toast.success("Removed from wishlist");
     } finally {
       setIsRemoving(null);
     }
@@ -29,171 +36,229 @@ export default function WishlistPage() {
     setIsAddingToCart(product.id);
     try {
       await new Promise((resolve) => setTimeout(resolve, 300));
-      addItem(product);
+      addItem(product, 1);
+      toast.success("Added to cart");
     } finally {
       setIsAddingToCart(null);
     }
   };
 
+  const handleClearWishlist = () => {
+    if (confirm("Are you sure you want to clear your wishlist?")) {
+      clearWishlist();
+      toast.success("Wishlist cleared");
+    }
+  };
+
   if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 sm:py-10">
         <div className="max-w-2xl mx-auto text-center">
-          <div className="mb-6">
-            <Heart className="mx-auto h-16 w-16 text-gray-400 mb-4" />
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Your wishlist is empty
-            </h1>
-            <p className="text-gray-600">
-              Start adding items you love to your wishlist!
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <Button
-              onClick={() => navigate("/products")}
-              className="w-full sm:w-auto"
-            >
+          <Card className="shadow-sm p-8 sm:p-12">
+            <div className="mb-6">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <Heart className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" />
+              </div>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                Your wishlist is empty
+              </h1>
+              <p className="text-gray-500 text-sm sm:text-base">
+                Start adding items you love to your wishlist!
+              </p>
+            </div>
+            <Button color="dark" onClick={() => navigate("/products")}>
+              <Package className="w-4 h-4 mr-2" />
               Browse Products
             </Button>
-          </div>
+          </Card>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          My Wishlist ({items.length} items)
-        </h1>
-        {items.length > 0 && (
-          <Button
-            variant="outline"
-            onClick={clearWishlist}
-            className="text-red-500 hover:text-red-700 hover:bg-red-50"
-          >
-            Clear Wishlist
-          </Button>
-        )}
-      </div>
+    <div className="container mx-auto px-4 py-4 sm:py-6 md:py-10">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Button
+              color="light"
+              size="sm"
+              onClick={() => navigate("/profile")}
+              className="hidden sm:flex"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-red-500" />
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
+                My Wishlist
+              </h1>
+              <Badge color="gray" size="sm" className="hidden sm:inline-flex">
+                {items.length} items
+              </Badge>
+            </div>
+          </div>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button
+              color="light"
+              size="sm"
+              onClick={() => navigate("/products")}
+              className="flex-1 sm:flex-none"
+            >
+              <Package className="w-4 h-4 mr-2" />
+              Continue Shopping
+            </Button>
+            <Button
+              color="red"
+              size="sm"
+              onClick={handleClearWishlist}
+              className="flex-1 sm:flex-none"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Clear All</span>
+              <span className="sm:hidden">Clear</span>
+            </Button>
+          </div>
+        </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {items.map((item) => (
-          <Card
-            key={item.product_id}
-            className="group hover:shadow-lg transition-shadow duration-300"
-          >
-            <CardHeader className="p-4">
+        {/* Mobile Item Count */}
+        <div className="sm:hidden mb-4">
+          <p className="text-gray-500 text-sm">{items.length} items saved</p>
+        </div>
+
+        {/* Wishlist Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          {items.map((item) => (
+            <Card key={item.product_id} className="shadow-sm overflow-hidden group">
+              {/* Product Image */}
               <div className="relative">
-                <img
-                  src={item.product.img}
-                  alt={item.product.name}
-                  className="w-full h-48 object-contain bg-gray-50 p-4 rounded-md mb-3"
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
+                <div 
+                  className="aspect-square bg-gray-50 overflow-hidden cursor-pointer"
+                  onClick={() => navigate(`/products/${item.product_id}`)}
+                >
+                  <img
+                    src={item.product.img}
+                    alt={item.product.name}
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                </div>
+                
+                {/* Remove Button */}
+                <button
                   onClick={() => handleRemoveFromWishlist(item.product_id)}
                   disabled={isRemoving === item.product_id}
-                  className="absolute top-2 right-2 h-8 w-8 p-0 bg-white/80 hover:bg-white text-red-500 hover:text-red-700 rounded-full"
+                  className="absolute top-2 right-2 p-2 bg-white/90 hover:bg-white text-gray-600 hover:text-red-500 rounded-full shadow-sm transition-colors"
                 >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                  {isRemoving === item.product_id ? (
+                    <Spinner size="sm" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                </button>
+
+                {/* Sale Badge */}
                 {item.product.old_price && (
                   <Badge
-                    variant="destructive"
+                    color="red"
                     className="absolute top-2 left-2"
                   >
                     Sale
                   </Badge>
                 )}
               </div>
-            </CardHeader>
 
-            <CardContent className="p-4 pt-0 space-y-3">
-              <div>
-                <Badge variant="secondary" className="text-xs">
+              {/* Product Info */}
+              <div className="p-4">
+                <Badge color="gray" size="xs" className="mb-2">
                   {item.product.category}
                 </Badge>
-                <h3 className="font-semibold text-lg text-gray-900 line-clamp-2 mt-2 mb-1">
+                
+                <h3 
+                  className="font-semibold text-gray-900 line-clamp-2 mb-2 cursor-pointer hover:text-blue-600 transition-colors"
+                  onClick={() => navigate(`/products/${item.product_id}`)}
+                >
                   {item.product.name}
                 </h3>
 
-                <div className="flex items-center gap-1 mb-2">
+                {/* Rating */}
+                <div className="flex items-center gap-1 mb-3">
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
                       <Star
                         key={i}
-                        className={`h-3 w-3 ${i < 4 ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}`}
+                        className={`w-3 h-3 ${i < 4 ? "fill-amber-400 text-amber-400" : "text-gray-300"}`}
                       />
                     ))}
                   </div>
-                  <span className="text-xs text-gray-600">(4.0)</span>
+                  <span className="text-xs text-gray-500">(4.0)</span>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <div className="flex items-baseline gap-2">
-                  <span className="text-xl font-bold text-gray-900">
-                    EGP {item.product.price}
-                  </span>
-                  {item.product.old_price && (
-                    <span className="text-sm text-gray-500 line-through">
-                      EGP {item.product.old_price}
+                {/* Price & Stock */}
+                <div className="mb-4">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-lg font-bold text-gray-900">
+                      {formatCurrency(item.product.price)}
                     </span>
+                    {item.product.old_price && (
+                      <span className="text-sm text-gray-400 line-through">
+                        {formatCurrency(item.product.old_price)}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {item.product.stock !== undefined && (
+                    <p className={`text-xs mt-1 ${item.product.stock > 0 ? "text-green-600" : "text-red-600"}`}>
+                      {item.product.stock > 0
+                        ? `${item.product.stock} in stock`
+                        : "Out of stock"}
+                    </p>
                   )}
                 </div>
 
-                {item.product.stock !== undefined && (
-                  <p
-                    className={`text-sm ${item.product.stock > 0 ? "text-green-600" : "text-red-600"}`}
+                {/* Actions */}
+                <div className="flex gap-2">
+                  <Button
+                    color="dark"
+                    size="sm"
+                    onClick={() => handleAddToCart(item.product)}
+                    disabled={isAddingToCart === item.product.id || item.product.stock === 0}
+                    className="flex-1"
                   >
-                    {item.product.stock > 0
-                      ? `${item.product.stock} in stock`
-                      : "Out of stock"}
-                  </p>
-                )}
+                    {isAddingToCart === item.product.id ? (
+                      <>
+                        <Spinner size="sm" className="mr-2" />
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        Add to Cart
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    color="light"
+                    size="sm"
+                    onClick={() => navigate(`/products/${item.product_id}`)}
+                  >
+                    View
+                  </Button>
+                </div>
               </div>
+            </Card>
+          ))}
+        </div>
 
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => handleAddToCart(item.product)}
-                  disabled={
-                    isAddingToCart === item.product.id ||
-                    item.product.stock === 0
-                  }
-                  className="flex-1"
-                  size="sm"
-                >
-                  <ShoppingCart className="mr-2 h-4 w-4" />
-                  {isAddingToCart === item.product.id
-                    ? "Adding..."
-                    : "Add to Cart"}
-                </Button>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => navigate(`/products/${item.product_id}`)}
-                >
-                  View
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <div className="mt-12 text-center">
-        <Button
-          variant="outline"
-          onClick={() => navigate("/products")}
-          size="lg"
-        >
-          Continue Shopping
-        </Button>
+        {/* Bottom Actions */}
+        <div className="mt-8 sm:mt-12 text-center">
+          <Button color="light" size="lg" onClick={() => navigate("/products")}>
+            <Package className="w-5 h-5 mr-2" />
+            Continue Shopping
+          </Button>
+        </div>
       </div>
     </div>
   );

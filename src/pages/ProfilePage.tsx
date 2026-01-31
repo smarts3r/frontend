@@ -14,6 +14,7 @@ import {
   X,
   Camera,
   ChevronRight,
+  Menu,
 } from "lucide-react";
 import {
   Avatar,
@@ -40,6 +41,7 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("profile");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const [profileForm, setProfileForm] = useState({
     first_name: user?.profile?.first_name || "",
@@ -130,6 +132,17 @@ export default function ProfilePage() {
     setIsEditingAddress(false);
   };
 
+  const handleTabChange = (tabId: string) => {
+    if (tabId === "orders") {
+      navigate("/orders");
+    } else if (tabId === "wishlist") {
+      navigate("/wishlist");
+    } else {
+      setActiveTab(tabId);
+    }
+    setIsMobileMenuOpen(false);
+  };
+
   if (!user) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
@@ -151,33 +164,33 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-6 md:py-10">
+    <div className="container mx-auto px-4 py-4 sm:py-6 md:py-10">
       <div className="max-w-5xl mx-auto">
         {/* Profile Header Card */}
-        <Card className="mb-6 shadow-sm">
-          <div className="p-6 md:p-8">
-            <div className="flex flex-col md:flex-row items-center gap-6">
+        <Card className="mb-4 sm:mb-6 shadow-sm">
+          <div className="p-4 sm:p-6 md:p-8">
+            <div className="flex flex-col md:flex-row items-center gap-4 sm:gap-6">
               {/* Avatar with upload button */}
-              <div className="relative">
+              <div className="relative flex-shrink-0">
                 <Avatar
                   img={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
                   alt={user.username}
                   rounded
                   size="xl"
-                  className="border-4 border-gray-100"
+                  className="border-4 border-gray-100 w-20 h-20 sm:w-24 sm:h-24"
                 />
-                <button className="absolute bottom-0 right-0 bg-gray-900 text-white p-2 rounded-full hover:bg-gray-800 transition-colors">
-                  <Camera className="w-4 h-4" />
+                <button className="absolute bottom-0 right-0 bg-gray-900 text-white p-1.5 sm:p-2 rounded-full hover:bg-gray-800 transition-colors">
+                  <Camera className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
               </div>
 
               {/* User Info */}
               <div className="flex-1 text-center md:text-left">
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-1">
                   {user.username}
                 </h1>
-                <p className="text-gray-500 mb-3">{user.email}</p>
-                <div className="flex items-center justify-center md:justify-start gap-3">
+                <p className="text-gray-500 text-sm sm:text-base mb-2 sm:mb-3">{user.email}</p>
+                <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-2 sm:gap-3">
                   <Badge
                     color={user.role.toUpperCase() === "ADMIN" ? "red" : "gray"}
                   >
@@ -188,38 +201,56 @@ export default function ProfilePage() {
                     )}
                     {user.role.toUpperCase()}
                   </Badge>
-                  <span className="text-sm text-gray-400">
+                  <span className="text-xs sm:text-sm text-gray-400">
                     Member since {user.created_at ? new Date(user.created_at).toLocaleDateString() : "Recently"}
                   </span>
                 </div>
               </div>
 
               {/* Quick Actions */}
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-row gap-2 w-full md:w-auto mt-2 md:mt-0">
                 {user.role.toUpperCase() === "ADMIN" && (
                   <Button
                     color="dark"
                     onClick={() => navigate("/admin")}
+                    className="flex-1 md:flex-none"
                   >
-                    Admin Panel
+                    Admin
                   </Button>
                 )}
                 <Button
                   color="light"
                   onClick={handleLogout}
+                  className="flex-1 md:flex-none"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
-                  Logout
+                  <span className="hidden sm:inline">Logout</span>
+                  <span className="sm:hidden">Exit</span>
                 </Button>
               </div>
             </div>
           </div>
         </Card>
 
+        {/* Mobile Menu Toggle */}
+        <div className="lg:hidden mb-4">
+          <Button
+            color="light"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="w-full flex items-center justify-between"
+          >
+            <span className="flex items-center gap-2">
+              <Menu className="w-5 h-5" />
+              Menu
+            </span>
+            <ChevronRight className={`w-5 h-5 transition-transform ${isMobileMenuOpen ? "rotate-90" : ""}`} />
+          </Button>
+        </div>
+
         {/* Main Content with Tabs */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
           {/* Sidebar Navigation */}
-          <div className="lg:col-span-1">
+          <div className={`lg:col-span-1 ${isMobileMenuOpen ? "block" : "hidden lg:block"}`}>
             <Card className="shadow-sm">
               <div className="p-2">
                 <nav className="space-y-1">
@@ -229,24 +260,16 @@ export default function ProfilePage() {
                     return (
                       <button
                         key={item.id}
-                        onClick={() => {
-                          if (item.id === "orders") {
-                            navigate("/orders");
-                          } else if (item.id === "wishlist") {
-                            navigate("/wishlist");
-                          } else {
-                            setActiveTab(item.id);
-                          }
-                        }}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                        onClick={() => handleTabChange(item.id)}
+                        className={`w-full flex items-center gap-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-sm font-medium transition-colors ${
                           isActive
                             ? "bg-gray-900 text-white"
                             : "text-gray-700 hover:bg-gray-100"
                         }`}
                       >
-                        <Icon className="w-5 h-5" />
-                        {item.label}
-                        {!isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <span className="flex-1 text-left">{item.label}</span>
+                        {!isActive && <ChevronRight className="w-4 h-4" />}
                       </button>
                     );
                   })}
@@ -260,17 +283,17 @@ export default function ProfilePage() {
             <Tabs>
               <TabItem active={activeTab === "profile"} title="Personal Info">
                 <Card className="shadow-sm">
-                  <div className="p-6">
-                    <div className="flex justify-between items-center mb-6">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          <User className="w-5 h-5 text-blue-600" />
+                  <div className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg">
+                          <User className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
+                          <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                             Personal Information
                           </h3>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-xs sm:text-sm text-gray-500">
                             Manage your personal details
                           </p>
                         </div>
@@ -279,6 +302,7 @@ export default function ProfilePage() {
                         <Button
                           color="light"
                           onClick={() => setIsEditingProfile(true)}
+                          className="w-full sm:w-auto"
                         >
                           <Edit2 className="w-4 h-4 mr-2" />
                           Edit
@@ -287,10 +311,10 @@ export default function ProfilePage() {
                     </div>
 
                     {isEditingProfile ? (
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-3 sm:space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                           <div>
-                            <Label htmlFor="first_name" className="mb-2 block">
+                            <Label htmlFor="first_name" className="mb-1.5 sm:mb-2 block text-sm">
                               First Name
                             </Label>
                             <TextInput
@@ -303,7 +327,7 @@ export default function ProfilePage() {
                             />
                           </div>
                           <div>
-                            <Label htmlFor="last_name" className="mb-2 block">
+                            <Label htmlFor="last_name" className="mb-1.5 sm:mb-2 block text-sm">
                               Last Name
                             </Label>
                             <TextInput
@@ -317,7 +341,7 @@ export default function ProfilePage() {
                           </div>
                         </div>
                         <div>
-                          <Label htmlFor="phone" className="mb-2 block">
+                          <Label htmlFor="phone" className="mb-1.5 sm:mb-2 block text-sm">
                             Phone Number
                           </Label>
                           <TextInput
@@ -331,11 +355,12 @@ export default function ProfilePage() {
                             icon={Phone}
                           />
                         </div>
-                        <div className="flex gap-3 pt-4 border-t">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4 border-t">
                           <Button
                             color="dark"
                             onClick={handleProfileSubmit}
                             disabled={profileLoading}
+                            className="w-full sm:w-auto"
                           >
                             {profileLoading ? (
                               <>
@@ -353,6 +378,7 @@ export default function ProfilePage() {
                             color="light"
                             onClick={cancelProfileEdit}
                             disabled={profileLoading}
+                            className="w-full sm:w-auto"
                           >
                             <X className="w-4 h-4 mr-2" />
                             Cancel
@@ -360,36 +386,36 @@ export default function ProfilePage() {
                         </div>
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="p-4 bg-gray-50 rounded-lg">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+                        <div className="p-3 sm:p-4 bg-gray-50 rounded-lg">
                           <Label className="text-xs font-semibold text-gray-500 uppercase block mb-1">
                             Full Name
                           </Label>
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium text-gray-900 text-sm sm:text-base">
                             {user.profile?.first_name || user.profile?.last_name
                               ? `${user.profile?.first_name || ""} ${user.profile?.last_name || ""}`
                               : "Not set"}
                           </p>
                         </div>
-                        <div className="p-4 bg-gray-50 rounded-lg">
+                        <div className="p-3 sm:p-4 bg-gray-50 rounded-lg">
                           <Label className="text-xs font-semibold text-gray-500 uppercase block mb-1">
                             Email Address
                           </Label>
-                          <p className="font-medium text-gray-900">{user.email}</p>
+                          <p className="font-medium text-gray-900 text-sm sm:text-base">{user.email}</p>
                         </div>
-                        <div className="p-4 bg-gray-50 rounded-lg">
+                        <div className="p-3 sm:p-4 bg-gray-50 rounded-lg">
                           <Label className="text-xs font-semibold text-gray-500 uppercase block mb-1">
                             Phone Number
                           </Label>
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium text-gray-900 text-sm sm:text-base">
                             {user.profile?.phone || "Not set"}
                           </p>
                         </div>
-                        <div className="p-4 bg-gray-50 rounded-lg">
+                        <div className="p-3 sm:p-4 bg-gray-50 rounded-lg">
                           <Label className="text-xs font-semibold text-gray-500 uppercase block mb-1">
                             Username
                           </Label>
-                          <p className="font-medium text-gray-900">{user.username}</p>
+                          <p className="font-medium text-gray-900 text-sm sm:text-base">{user.username}</p>
                         </div>
                       </div>
                     )}
@@ -397,18 +423,18 @@ export default function ProfilePage() {
                 </Card>
 
                 {/* Address Section */}
-                <Card className="shadow-sm mt-6">
-                  <div className="p-6">
-                    <div className="flex justify-between items-center mb-6">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-green-100 rounded-lg">
-                          <MapPin className="w-5 h-5 text-green-600" />
+                <Card className="shadow-sm mt-4 sm:mt-6">
+                  <div className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-4 sm:mb-6">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg">
+                          <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
+                          <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                             Shipping Address
                           </h3>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-xs sm:text-sm text-gray-500">
                             Manage your delivery address
                           </p>
                         </div>
@@ -417,6 +443,7 @@ export default function ProfilePage() {
                         <Button
                           color="light"
                           onClick={() => setIsEditingAddress(true)}
+                          className="w-full sm:w-auto"
                         >
                           <Edit2 className="w-4 h-4 mr-2" />
                           {user.profile?.address ? "Edit" : "Add Address"}
@@ -425,9 +452,9 @@ export default function ProfilePage() {
                     </div>
 
                     {isEditingAddress ? (
-                      <div className="space-y-4">
+                      <div className="space-y-3 sm:space-y-4">
                         <div>
-                          <Label htmlFor="address" className="mb-2 block">
+                          <Label htmlFor="address" className="mb-1.5 sm:mb-2 block text-sm">
                             Street Address
                           </Label>
                           <TextInput
@@ -439,9 +466,9 @@ export default function ProfilePage() {
                             placeholder="Enter street address"
                           />
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                           <div>
-                            <Label htmlFor="city" className="mb-2 block">
+                            <Label htmlFor="city" className="mb-1.5 sm:mb-2 block text-sm">
                               City
                             </Label>
                             <TextInput
@@ -454,7 +481,7 @@ export default function ProfilePage() {
                             />
                           </div>
                           <div>
-                            <Label htmlFor="state" className="mb-2 block">
+                            <Label htmlFor="state" className="mb-1.5 sm:mb-2 block text-sm">
                               State / Province
                             </Label>
                             <TextInput
@@ -467,9 +494,9 @@ export default function ProfilePage() {
                             />
                           </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                           <div>
-                            <Label htmlFor="zip_code" className="mb-2 block">
+                            <Label htmlFor="zip_code" className="mb-1.5 sm:mb-2 block text-sm">
                               ZIP / Postal Code
                             </Label>
                             <TextInput
@@ -482,7 +509,7 @@ export default function ProfilePage() {
                             />
                           </div>
                           <div>
-                            <Label htmlFor="country" className="mb-2 block">
+                            <Label htmlFor="country" className="mb-1.5 sm:mb-2 block text-sm">
                               Country
                             </Label>
                             <TextInput
@@ -495,11 +522,12 @@ export default function ProfilePage() {
                             />
                           </div>
                         </div>
-                        <div className="flex gap-3 pt-4 border-t">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4 border-t">
                           <Button
                             color="dark"
                             onClick={handleAddressSubmit}
                             disabled={addressLoading}
+                            className="w-full sm:w-auto"
                           >
                             {addressLoading ? (
                               <>
@@ -517,6 +545,7 @@ export default function ProfilePage() {
                             color="light"
                             onClick={cancelAddressEdit}
                             disabled={addressLoading}
+                            className="w-full sm:w-auto"
                           >
                             <X className="w-4 h-4 mr-2" />
                             Cancel
@@ -526,27 +555,28 @@ export default function ProfilePage() {
                     ) : (
                       <>
                         {user.profile?.address ? (
-                          <div className="p-4 bg-gray-50 rounded-lg">
-                            <div className="flex items-start gap-3">
-                              <MapPin className="w-5 h-5 text-gray-400 mt-0.5" />
+                          <div className="p-3 sm:p-4 bg-gray-50 rounded-lg">
+                            <div className="flex items-start gap-2 sm:gap-3">
+                              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 mt-0.5 flex-shrink-0" />
                               <div>
-                                <p className="font-medium text-gray-900">
+                                <p className="font-medium text-gray-900 text-sm sm:text-base">
                                   {user.profile.address}
                                 </p>
-                                <p className="text-gray-600">
+                                <p className="text-gray-600 text-sm">
                                   {user.profile.city}, {user.profile.state} {user.profile.zip_code}
                                 </p>
-                                <p className="text-gray-600">{user.profile.country}</p>
+                                <p className="text-gray-600 text-sm">{user.profile.country}</p>
                               </div>
                             </div>
                           </div>
                         ) : (
-                          <div className="text-center py-8 bg-gray-50 rounded-lg">
-                            <MapPin className="w-12 h-12 mx-auto text-gray-300 mb-3" />
-                            <p className="text-gray-500 mb-4">No address saved yet</p>
+                          <div className="text-center py-6 sm:py-8 bg-gray-50 rounded-lg">
+                            <MapPin className="w-10 h-10 sm:w-12 sm:h-12 mx-auto text-gray-300 mb-3" />
+                            <p className="text-gray-500 mb-4 text-sm sm:text-base">No address saved yet</p>
                             <Button
                               color="dark"
                               onClick={() => setIsEditingAddress(true)}
+                              className="w-full sm:w-auto"
                             >
                               Add Your Address
                             </Button>
@@ -560,11 +590,11 @@ export default function ProfilePage() {
 
               <TabItem active={activeTab === "settings"} title="Settings">
                 <Card className="shadow-sm">
-                  <div className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <div className="p-4 sm:p-6">
+                    <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">
                       Account Settings
                     </h3>
-                    <p className="text-gray-500">
+                    <p className="text-gray-500 text-sm sm:text-base">
                       Settings options will be available soon.
                     </p>
                   </div>

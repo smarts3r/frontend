@@ -7,7 +7,7 @@ import CheckoutPage from "@/pages/CheckoutPage";
 import { HomePage } from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
 import OrdersPage from "@/pages/OrdersPage";
-
+import CategoriesPage from "@/pages/CategoriesPage";
 import ProductsPage from "@/pages/ProductsPage";
 import ProfilePage from "@/pages/ProfilePage";
 import RegisterPage from "@/pages/RegisterPage";
@@ -42,6 +42,10 @@ export const router = createBrowserRouter([
       {
         path: "products/:id",
         element: <ProductDetailsPage />,
+      },
+      {
+        path: "categories",
+        element: <CategoriesPage />,
       },
       {
         path: "cart",
