@@ -1,4 +1,4 @@
-import { Filter, Search, X } from "lucide-react";
+import { Filter, Search, X, AlertCircle, RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ProductCard } from "@/components/common/ProductCard";
@@ -22,6 +22,7 @@ const ProductsPage = () => {
   const [categories, setCategories] = useState<string[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>(
     searchParams.get("category") || "all",
   );
@@ -65,12 +66,20 @@ const ProductsPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
         const [productsData, categoriesData] = await Promise.all([
           productService.getAll(),
           categoryService.getAll(),
         ]);
+
+        if (!productsData || !Array.isArray(productsData)) {
+          throw new Error("Invalid products data received from server");
+        }
+
         setProducts(productsData);
-        setCategories(categoriesData);
+        setCategories(categoriesData || []);
 
         if (productsData.length > 0) {
           const prices = productsData.map((p) => p.price);
@@ -86,8 +95,10 @@ const ProductsPage = () => {
           setPriceRange([finalMinPrice, finalMaxPrice]);
           setPriceInitialized(true);
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        setError("Failed to load products. Please try again later.");
+        setProducts([]);
       } finally {
         setLoading(false);
       }
@@ -101,15 +112,15 @@ const ProductsPage = () => {
 
     if (selectedCategory !== "all") {
       filtered = filtered.filter(
-        (product) => product.category.toLowerCase() === selectedCategory.toLowerCase(),
+        (product) => product.category === selectedCategory
       );
     }
 
     if (searchTerm) {
       filtered = filtered.filter(
         (product) =>
-          product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          product.category.toLowerCase().includes(searchTerm.toLowerCase()),
+          product.name.includes(searchTerm) ||
+          product.category.includes(searchTerm),
       );
     }
 
@@ -197,6 +208,27 @@ const ProductsPage = () => {
                 <div key={i} className="h-64 bg-gray-200 rounded-lg"></div>
               ))}
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="container mx-auto px-4 py-16">
+          <div className="text-center max-w-md mx-auto bg-white rounded-lg p-8 shadow-sm">
+            <AlertCircle className="w-16 h-16 mx-auto text-red-500 mb-4" />
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Failed to Load Products</h2>
+            <p className="text-red-600 mb-2">{error}</p>
+            <p className="text-gray-500 text-sm mb-6">The server may be experiencing issues. Please try again later.</p>
+            <Button
+              color="blue"
+              onClick={() => window.location.reload()}
+            >
+              <RefreshCw className="w-4 h-4 mr-2" /> Retry
+            </Button>
           </div>
         </div>
       </div>

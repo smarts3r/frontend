@@ -5,6 +5,8 @@ import {
   ShoppingBag,
   Star,
   ArrowUpRight,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
 import { Button, Badge } from "flowbite-react";
 import { productService } from "@/services";
@@ -18,17 +20,30 @@ export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
+        setError(null);
         const data = await productService.getAll();
-        setProducts(Array.isArray(data) ? data : []);
+        
+        if (!data || !Array.isArray(data)) {
+          console.error("Invalid data format received:", data);
+          setError("Received invalid data from server");
+          setProducts([]);
+          return;
+        }
+        
+        setProducts(data);
         
         const uniqueCategories = [...new Set(data.map((p: Product) => p.category))];
         setCategories(uniqueCategories.slice(0, 6));
       } catch (err) {
         console.error("Error loading products:", err);
+        setError("Failed to load products. Please try again later.");
+        setProducts([]);
       } finally {
         setLoading(false);
       }
@@ -138,6 +153,19 @@ export default function HomePage() {
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="bg-slate-100 rounded-lg aspect-[3/4] animate-pulse" />
               ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-16 bg-red-50 rounded-lg">
+              <AlertCircle className="w-12 h-12 mx-auto text-red-500 mb-4" />
+              <p className="text-red-700 font-medium mb-2">{error}</p>
+              <p className="text-red-500 text-sm mb-4">The server may be experiencing issues.</p>
+              <Button 
+                color="light" 
+                size="sm" 
+                onClick={() => window.location.reload()}
+              >
+                <RefreshCw className="w-4 h-4 mr-2" /> Retry
+              </Button>
             </div>
           ) : products.length === 0 ? (
             <div className="text-center py-16">

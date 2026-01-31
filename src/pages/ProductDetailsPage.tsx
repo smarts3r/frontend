@@ -34,6 +34,7 @@ export const ProductDetailsPage: React.FC = () => {
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [relatedLoading, setRelatedLoading] = useState(false);
+  const [relatedError, setRelatedError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
@@ -69,8 +70,14 @@ export const ProductDetailsPage: React.FC = () => {
         setProduct(productData);
 
         setRelatedLoading(true);
+        setRelatedError(null);
         try {
           const allProducts = await productService.getAll();
+          
+          if (!allProducts || !Array.isArray(allProducts)) {
+            throw new Error("Invalid data received from server");
+          }
+          
           const related = allProducts
             .filter(
               (p) =>
@@ -80,6 +87,8 @@ export const ProductDetailsPage: React.FC = () => {
           setRelatedProducts(related);
         } catch (error) {
           console.error("Failed to fetch related products:", error);
+          setRelatedError("Unable to load related products");
+          setRelatedProducts([]);
         } finally {
           setRelatedLoading(false);
         }
@@ -392,17 +401,29 @@ export const ProductDetailsPage: React.FC = () => {
       </div>
 
       {/* Related Products */}
-      {relatedProducts.length > 0 && (
-        <section className="mt-16 md:mt-20">
-          <div className="text-center mb-8">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
-              {t("productDetails.relatedProducts.title")}
-            </h2>
-            <p className="text-gray-500 text-sm md:text-base">
-              {t("productDetails.relatedProducts.subtitle")}
-            </p>
-          </div>
+      <section className="mt-16 md:mt-20">
+        <div className="text-center mb-8">
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+            {t("productDetails.relatedProducts.title")}
+          </h2>
+          <p className="text-gray-500 text-sm md:text-base">
+            {t("productDetails.relatedProducts.subtitle")}
+          </p>
+        </div>
 
+        {relatedError ? (
+          <div className="text-center py-8 bg-gray-50 rounded-lg">
+            <p className="text-gray-500">{relatedError}</p>
+            <p className="text-gray-400 text-sm mt-1">Please try again later</p>
+          </div>
+        ) : relatedProducts.length === 0 && !relatedLoading ? (
+          <div className="text-center py-8 bg-gray-50 rounded-lg">
+            <p className="text-gray-500">No related products found</p>
+            <Link to="/products" className="text-blue-600 hover:underline text-sm mt-2 inline-block">
+              Browse all products
+            </Link>
+          </div>
+        ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {relatedLoading
               ? [...Array(4)].map((_, index) => (
@@ -458,8 +479,8 @@ export const ProductDetailsPage: React.FC = () => {
                   </Card>
                 ))}
           </div>
-        </section>
-      )}
+        )}
+      </section>
     </div>
   );
 };
