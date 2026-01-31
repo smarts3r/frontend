@@ -29,6 +29,7 @@ const ProductsPage = () => {
     searchParams.get("search") || "",
   );
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000]);
+  const [priceInitialized, setPriceInitialized] = useState(false);
   const [selectedStock, setSelectedStock] = useState<string>("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -69,14 +70,21 @@ const ProductsPage = () => {
           categoryService.getAll(),
         ]);
         setProducts(productsData);
-        setFilteredProducts(productsData);
         setCategories(categoriesData);
 
         if (productsData.length > 0) {
           const prices = productsData.map((p) => p.price);
-          const minPrice = Math.min(...prices);
-          const maxPrice = Math.max(...prices);
-          setPriceRange([minPrice, maxPrice]);
+          const productMinPrice = Math.min(...prices);
+          const productMaxPrice = Math.max(...prices);
+
+          // Check for URL params first, otherwise use product price range
+          const urlMinPrice = searchParams.get("minPrice");
+          const urlMaxPrice = searchParams.get("maxPrice");
+          const finalMinPrice = urlMinPrice ? Math.max(parseInt(urlMinPrice), productMinPrice) : productMinPrice;
+          const finalMaxPrice = urlMaxPrice ? Math.min(parseInt(urlMaxPrice), productMaxPrice) : productMaxPrice;
+
+          setPriceRange([finalMinPrice, finalMaxPrice]);
+          setPriceInitialized(true);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -93,7 +101,7 @@ const ProductsPage = () => {
 
     if (selectedCategory !== "all") {
       filtered = filtered.filter(
-        (product) => product.category === selectedCategory,
+        (product) => product.category.toLowerCase() === selectedCategory.toLowerCase(),
       );
     }
 
@@ -105,10 +113,13 @@ const ProductsPage = () => {
       );
     }
 
-    filtered = filtered.filter(
-      (product) =>
-        product.price >= priceRange[0] && product.price <= priceRange[1],
-    );
+    // Filter by price only after price range has been initialized from products
+    if (priceInitialized) {
+      filtered = filtered.filter(
+        (product) =>
+          product.price >= priceRange[0] && product.price <= priceRange[1],
+      );
+    }
 
     if (selectedStock !== "all") {
       filtered = filtered.filter((product) => {
@@ -135,6 +146,7 @@ const ProductsPage = () => {
     priceRange,
     selectedStock,
     selectedTags,
+    priceInitialized,
   ]);
 
   const totalPages = Math.ceil((filteredProducts?.length || 0) / productsPerPage);
