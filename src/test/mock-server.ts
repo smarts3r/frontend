@@ -13,9 +13,9 @@ const mockUser = {
 const mockAdminUser = {
   id: '2',
   email: 'dev@email.com',
-  firstName: 'Admin',
+  firstName: "ADMIN",
   lastName: 'User',
-  role: 'admin'
+  role: "ADMIN"
 };
 
 const mockProduct = {

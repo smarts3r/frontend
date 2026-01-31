@@ -44,7 +44,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     console.log("AdminDashboard: useEffect start", user);
     // Check if user is admin
-    // if (user?.role !== "admin") {
+    // if (user.role.toUpperCase() !== "ADMIN") {
     //   console.log("AdminDashboard: user not admin, redirecting");
     //   navigate("/");
     //   return;
@@ -425,7 +425,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center space-x-2">
                       <Badge
                         variant={
-                          userItem.role === "admin" ? "default" : "secondary"
+                          userItem.role === "ADMIN" ? "default" : "secondary"
                         }
                       >
                         {userItem.role}

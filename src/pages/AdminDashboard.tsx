@@ -46,7 +46,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     console.log("AdminDashboard: useEffect start", user);
     // Check if user is admin
-    // if (user?.role !== "admin") {
+    // if (user.role.toUpperCase() !== "ADMIN") {
     //   console.log("AdminDashboard: user not admin, redirecting");
     //   navigate("/");
     //   return;
@@ -187,9 +187,8 @@ export default function AdminDashboard() {
               <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
             )}
             <span
-              className={`text-sm font-medium ${
-                isPositive ? "text-green-500" : "text-red-500"
-              }`}
+              className={`text-sm font-medium ${isPositive ? "text-green-500" : "text-red-500"
+                }`}
             >
               {Math.abs(growth)}%
             </span>
@@ -420,7 +419,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center space-x-2">
                       <Badge
                         variant={
-                          userItem.role === "admin" ? "default" : "secondary"
+                          userItem.role === "ADMIN" ? "default" : "secondary"
                         }
                       >
                         {userItem.role}

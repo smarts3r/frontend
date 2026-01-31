@@ -5,7 +5,7 @@ export interface MockUser {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'user' | 'admin';
+  role: 'user' | "ADMIN";
 }
 
 export interface MockProduct {
@@ -63,14 +63,14 @@ export const validateMockUser = (user: any): MockUser => {
   if (!user || typeof user !== 'object') {
     throw new Error('Invalid user data');
   }
-  
+
   const required = ['id', 'email', 'firstName', 'lastName', 'role'];
   const missing = required.filter(field => !user[field]);
-  
+
   if (missing.length > 0) {
     throw new Error(`Missing required fields: ${missing.join(', ')}`);
   }
-  
+
   return user as MockUser;
 };
 
@@ -78,14 +78,14 @@ export const validateMockProduct = (product: any): MockProduct => {
   if (!product || typeof product !== 'object') {
     throw new Error('Invalid product data');
   }
-  
+
   const required = ['id', 'name', 'description', 'price', 'category', 'imageUrl', 'stock', 'rating'];
   const missing = required.filter(field => !(field in product));
-  
+
   if (missing.length > 0) {
     throw new Error(`Missing required fields: ${missing.join(', ')}`);
   }
-  
+
   return product as MockProduct;
 };
 
@@ -93,13 +93,13 @@ export const validateMockCategory = (category: any): MockCategory => {
   if (!category || typeof category !== 'object') {
     throw new Error('Invalid category data');
   }
-  
+
   const required = ['id', 'name', 'description'];
   const missing = required.filter(field => !(field in category));
-  
+
   if (missing.length > 0) {
     throw new Error(`Missing required fields: ${missing.join(', ')}`);
   }
-  
+
   return category as MockCategory;
 };

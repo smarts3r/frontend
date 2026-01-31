@@ -47,7 +47,7 @@ export interface User {
   username?: string;
   email: string;
   password?: string;
-  role: "admin" | "user";
+  role: "ADMIN" | "user";
   created_at?: string;
   updated_at?: string;
   profile?: Profile;

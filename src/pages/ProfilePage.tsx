@@ -41,9 +41,9 @@ export default function ProfilePage() {
                             <span>{user.email}</span>
                         </div>
                         <div className="pt-2">
-                            <Badge variant={user.role === 'admin' ? "destructive" : "secondary"}>
-                                {user.role === 'admin' ? <Shield className="w-3 h-3 mr-1" /> : <User className="w-3 h-3 mr-1" />}
-                                {user.role.toUpperCase()}
+                            <Badge variant={user.role.toUpperCase() === "ADMIN" ? "destructive" : "secondary"}>
+                                {user.role.toUpperCase() === "ADMIN" ? <Shield className="w-3 h-3 mr-1" /> : <User className="w-3 h-3 mr-1" />}
+                                {user.role.toUpperCase().toUpperCase()}
                             </Badge>
                         </div>
                     </div>
@@ -51,7 +51,7 @@ export default function ProfilePage() {
                         <Button variant="outline" onClick={() => navigate("/orders")}>
                             My Orders
                         </Button>
-                        {user.role === 'admin' && (
+                        {user.role.toUpperCase() === "ADMIN" && (
                             <Button variant="secondary" onClick={() => navigate("/admin")}>
                                 Admin Dashboard <ExternalLink className="ml-2 w-3 h-3" />
                             </Button>

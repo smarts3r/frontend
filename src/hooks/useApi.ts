@@ -46,7 +46,7 @@ export function useApi<T>() {
       };
 
       // Add authentication token if available
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken') || localStorage.getItem('token');
       if (token) {
         const headers = new Headers(config.headers);
         if (!headers.has('Authorization')) {
@@ -80,10 +80,18 @@ export function useApi<T>() {
 
       if (contentType?.includes('application/json')) {
         result = await response.json();
-      } else if (contentType?.includes('text/') || contentType?.includes('application/octet-stream') || contentType?.includes('text/csv')) {
-        result = await response.blob() as unknown as T;
+      } else if (contentType?.includes('text/')) {
+        // For text responses, cast to T which should be string or compatible type
+        const textResult = await response.text();
+        result = textResult as T;
+      } else if (contentType?.includes('application/octet-stream') || contentType?.includes('text/csv')) {
+        // For binary data, return as Blob
+        const blobResult = await response.blob();
+        result = blobResult as T;
       } else {
-        result = await response.text() as unknown as T;
+        // Default to text for other content types
+        const textResult = await response.text();
+        result = textResult as T;
       }
 
       setData(result);

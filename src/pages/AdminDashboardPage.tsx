@@ -49,7 +49,7 @@ export default function AdminDashboardPage() {
   }, []);
 
   // Guard: Only show to admins
-  if (!user || user.role !== "admin") {
+  if (!user || user.role.toUpperCase().toUpperCase() !== "ADMIN") {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-8">
         <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
@@ -157,7 +157,7 @@ export default function AdminDashboardPage() {
         </div>
         <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium">
           <Users className="w-4 h-4" />
-          Logged in as {user.username || "Admin"}
+          Logged in as {user.username || "ADMIN"}
         </div>
       </div>
 
