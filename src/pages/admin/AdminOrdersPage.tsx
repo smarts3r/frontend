@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Search,
   Download,
@@ -41,6 +42,7 @@ interface OrderStats {
 }
 
 export default function AdminOrdersPage() {
+  const { t } = useTranslation();
   const formatCurrency = useCurrencyFormat();
   const { data: ordersData, loading, getAdminOrders } = useGetAdminOrders();
   const { updateAdminOrder } = useUpdateAdminOrder();
@@ -79,11 +81,11 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     if (newOrders.length > 0) {
-      toast.success(`New order received: #${newOrders[0].id}`);
+      toast.success(t('admin.orders.newOrderReceived', { id: newOrders[0].id }));
       setOrders(prev => [newOrders[0], ...prev]);
       clearNewOrders();
     }
-  }, [newOrders, clearNewOrders]);
+  }, [newOrders, clearNewOrders, t]);
 
   useEffect(() => {
     if (updatedOrders.length > 0) {
@@ -252,14 +254,14 @@ export default function AdminOrdersPage() {
     setIsModalLoading(true);
     try {
       await updateAdminOrder(orderId, { status: status as AdminOrder['status'] });
-      toast.success(`Order #${orderId} updated to ${status}`);
+      toast.success(t('admin.orders.statusUpdated', { id: orderId, status }));
       setOrders(prev => prev.map(order =>
         order.id.toString() === orderId
           ? { ...order, status: status as AdminOrder['status'] }
           : order
       ));
     } catch {
-      toast.error('Failed to update order status');
+      toast.error(t('admin.orders.errors.statusUpdateFailed'));
     } finally {
       setIsModalLoading(false);
     }
@@ -268,10 +270,10 @@ export default function AdminOrdersPage() {
   const handleStatusUpdate = async (orderId: string, status: string) => {
     try {
       await updateAdminOrder(orderId, { status: status as AdminOrder['status'] });
-      toast.success(`Order #${orderId} updated to ${status}`);
+      toast.success(t('admin.orders.statusUpdated', { id: orderId, status }));
       getAdminOrders();
     } catch {
-      toast.error('Failed to update order status');
+      toast.error(t('admin.orders.errors.statusUpdateFailed'));
     }
   };
 
@@ -284,11 +286,11 @@ export default function AdminOrdersPage() {
         orderIds: Array.from(selectedOrders).map(id => id.toString()),
         status: status as 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
       });
-      toast.success(`Updated ${selectedOrders.size} orders to ${status}`);
+      toast.success(t('admin.orders.bulkStatusUpdated', { count: selectedOrders.size, status }));
       setSelectedOrders(new Set());
       getAdminOrders();
     } catch {
-      toast.error('Failed to update orders');
+      toast.error(t('admin.orders.errors.bulkUpdateFailed'));
     } finally {
       setUpdatingStatus(false);
     }
@@ -297,9 +299,9 @@ export default function AdminOrdersPage() {
   const handleExport = async () => {
     try {
       await exportOrders();
-      toast.success('Orders exported successfully');
+      toast.success(t('admin.orders.exported'));
     } catch {
-      toast.error('Failed to export orders');
+      toast.error(t('admin.orders.errors.exportFailed'));
     }
   };
 
@@ -309,7 +311,7 @@ export default function AdminOrdersPage() {
     const selectedData = orders.filter(o => selectedOrders.has(o.id));
     const csvContent = convertToCSV(selectedData);
     downloadCSV(csvContent, `selected-orders-${new Date().toISOString().split('T')[0]}.csv`);
-    toast.success(`Exported ${selectedOrders.size} orders`);
+    toast.success(t('admin.orders.exportedSelected', { count: selectedOrders.size }));
   };
 
   const handlePrintSelected = () => {
@@ -467,17 +469,17 @@ export default function AdminOrdersPage() {
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Orders</h1>
-          <p className="text-gray-600">Manage and track all customer orders</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('admin.orders.title')}</h1>
+          <p className="text-gray-600">{t('admin.orders.subtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-            {isConnected ? 'Live' : 'Offline'}
+            {isConnected ? t('admin.orders.live') : t('admin.orders.offline')}
           </div>
           <Button color="gray" onClick={handleExport}>
             <Download className="w-4 h-4 mr-2" />
-            Export All
+            {t('admin.orders.exportAll')}
           </Button>
         </div>
       </div>
@@ -491,12 +493,12 @@ export default function AdminOrdersPage() {
               </div>
               {stats.todayGrowth !== 0 && (
                 <span className={`text-xs font-medium ${stats.todayGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {stats.todayGrowth > 0 ? '↑' : '↓'} {Math.abs(stats.todayGrowth)}% vs yest
+                  {stats.todayGrowth > 0 ? '↑' : '↓'} {Math.abs(stats.todayGrowth)}% {t('admin.orders.vsYesterday')}
                 </span>
               )}
             </div>
             <p className="text-2xl font-bold text-gray-900 mt-2">{stats.todayOrders}</p>
-            <p className="text-sm text-gray-600">Today&apos;s Orders</p>
+            <p className="text-sm text-gray-600">{t('admin.orders.stats.todayOrders')}</p>
           </div>
         </Card>
 
@@ -508,7 +510,7 @@ export default function AdminOrdersPage() {
               </div>
             </div>
             <p className="text-2xl font-bold text-gray-900 mt-2">{stats.pendingOrders}</p>
-            <p className="text-sm text-gray-600">Pending</p>
+            <p className="text-sm text-gray-600">{t('admin.orders.stats.pending')}</p>
           </div>
         </Card>
 
@@ -520,7 +522,7 @@ export default function AdminOrdersPage() {
               </div>
             </div>
             <p className="text-2xl font-bold text-gray-900 mt-2">{stats.processingOrders}</p>
-            <p className="text-sm text-gray-600">Processing</p>
+            <p className="text-sm text-gray-600">{t('admin.orders.stats.processing')}</p>
           </div>
         </Card>
 
@@ -532,12 +534,12 @@ export default function AdminOrdersPage() {
               </div>
               {stats.completedGrowth !== 0 && (
                 <span className={`text-xs font-medium ${stats.completedGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {stats.completedGrowth > 0 ? '↑' : '↓'} {Math.abs(stats.completedGrowth)}% vs yest
+                  {stats.completedGrowth > 0 ? '↑' : '↓'} {Math.abs(stats.completedGrowth)}% {t('admin.orders.vsYesterday')}
                 </span>
               )}
             </div>
             <p className="text-2xl font-bold text-gray-900 mt-2">{stats.completedToday}</p>
-            <p className="text-sm text-gray-600">Completed Today</p>
+            <p className="text-sm text-gray-600">{t('admin.orders.stats.completedToday')}</p>
           </div>
         </Card>
       </div>
@@ -592,19 +594,19 @@ export default function AdminOrdersPage() {
               onClick={() => setQuickDateRange('today')}
               className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
             >
-              Today
+              {t('admin.orders.filters.today')}
             </button>
             <button
               onClick={() => setQuickDateRange('week')}
               className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
             >
-              Last 7 Days
+              {t('admin.orders.filters.last7Days')}
             </button>
             <button
               onClick={() => setQuickDateRange('month')}
               className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
             >
-              This Month
+              {t('admin.orders.filters.thisMonth')}
             </button>
             {(dateFrom || dateTo) && (
               <button
@@ -612,7 +614,7 @@ export default function AdminOrdersPage() {
                 className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1"
               >
                 <X className="w-3 h-3" />
-                Clear dates
+                {t('admin.orders.filters.clearDates')}
               </button>
             )}
           </div>
@@ -627,8 +629,8 @@ export default function AdminOrdersPage() {
                 <Package className="w-5 h-5" />
               </div>
               <div>
-                <span className="font-semibold">{selectedOrders.size} orders selected</span>
-                <p className="text-sm text-gray-400">Choose an action to apply to all selected orders</p>
+                <span className="font-semibold">{t('admin.orders.selected', { count: selectedOrders.size })}</span>
+                <p className="text-sm text-gray-400">{t('admin.orders.chooseAction')}</p>
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -638,13 +640,13 @@ export default function AdminOrdersPage() {
                 disabled={updatingStatus}
                 className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-600 disabled:opacity-50"
               >
-                <option value="">Update Status</option>
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="processing">Processing</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="">{t('admin.orders.updateStatus')}</option>
+                <option value="pending">{t('admin.orders.status.pending')}</option>
+                <option value="confirmed">{t('admin.orders.status.confirmed')}</option>
+                <option value="processing">{t('admin.orders.status.processing')}</option>
+                <option value="shipped">{t('admin.orders.status.shipped')}</option>
+                <option value="delivered">{t('admin.orders.status.delivered')}</option>
+                <option value="cancelled">{t('admin.orders.status.cancelled')}</option>
               </select>
               <button
                 onClick={handlePrintSelected}
@@ -652,7 +654,7 @@ export default function AdminOrdersPage() {
                 className="px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50"
               >
                 <Printer className="w-4 h-4" />
-                Print
+                {t('admin.orders.print')}
               </button>
               <button
                 onClick={handleExportSelected}
@@ -660,13 +662,13 @@ export default function AdminOrdersPage() {
                 className="px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50"
               >
                 <FileSpreadsheet className="w-4 h-4" />
-                Export
+                {t('admin.orders.export')}
               </button>
               <button
                 onClick={() => setSelectedOrders(new Set())}
                 className="px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-sm transition-colors"
               >
-                Clear
+                {t('admin.orders.clear')}
               </button>
             </div>
           </div>
@@ -691,7 +693,7 @@ export default function AdminOrdersPage() {
                   onClick={() => handleSort('id')}
                 >
                   <div className="flex items-center gap-1">
-                    Order #
+                    {t('admin.orders.table.orderNumber')}
                     <SortIcon field="id" />
                   </div>
                 </th>
@@ -700,17 +702,17 @@ export default function AdminOrdersPage() {
                   onClick={() => handleSort('customerName')}
                 >
                   <div className="flex items-center gap-1">
-                    Customer
+                    {t('admin.orders.table.customer')}
                     <SortIcon field="customerName" />
                   </div>
                 </th>
-                <th className="px-4 py-3 text-sm font-medium text-gray-700">Items</th>
+                <th className="px-4 py-3 text-sm font-medium text-gray-700">{t('admin.orders.table.items')}</th>
                 <th
                   className="px-4 py-3 text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('total')}
                 >
                   <div className="flex items-center gap-1">
-                    Total
+                    {t('admin.orders.table.total')}
                     <SortIcon field="total" />
                   </div>
                 </th>
@@ -719,7 +721,7 @@ export default function AdminOrdersPage() {
                   onClick={() => handleSort('status')}
                 >
                   <div className="flex items-center gap-1">
-                    Status
+                    {t('admin.orders.table.status')}
                     <SortIcon field="status" />
                   </div>
                 </th>
@@ -728,18 +730,18 @@ export default function AdminOrdersPage() {
                   onClick={() => handleSort('created_at')}
                 >
                   <div className="flex items-center gap-1">
-                    Date
+                    {t('admin.orders.table.date')}
                     <SortIcon field="created_at" />
                   </div>
                 </th>
-                <th className="px-4 py-3 text-sm font-medium text-gray-700">Actions</th>
+                <th className="px-4 py-3 text-sm font-medium text-gray-700">{t('admin.orders.table.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {paginatedOrders.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
-                    No orders found
+                    {t('admin.orders.empty')}
                   </td>
                 </tr>
               ) : (
@@ -763,14 +765,14 @@ export default function AdminOrdersPage() {
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
-                      {order.orderItems?.length || 1} items
+                      {t('admin.orders.itemCount', { count: order.orderItems?.length || 1 })}
                     </td>
                     <td className="px-4 py-3 text-sm font-medium text-gray-900">
                       {formatCurrency(order.total || 0)}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusBadgeColor(order.status)}`}>
-                        {order.status || 'Pending'}
+                        {order.status || t('admin.orders.status.pending')}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
@@ -781,7 +783,7 @@ export default function AdminOrdersPage() {
                         <button
                           onClick={() => openOrderDetail(order)}
                           className="p-1 hover:bg-gray-100 rounded"
-                          title="View Order Details"
+                          title={t('admin.orders.viewOrderDetails')}
                         >
                           <Eye className="w-4 h-4 text-gray-600" />
                         </button>
@@ -795,20 +797,20 @@ export default function AdminOrdersPage() {
                           )}
                         >
                           <DropdownItem onClick={() => handleStatusUpdate(order.id.toString(), 'confirmed')}>
-                            <Check className="w-4 h-4 mr-2" /> Confirm
+                            <Check className="w-4 h-4 mr-2" /> {t('admin.orders.status.confirmed')}
                           </DropdownItem>
                           <DropdownItem onClick={() => handleStatusUpdate(order.id.toString(), 'processing')}>
-                            <Edit className="w-4 h-4 mr-2" /> Processing
+                            <Edit className="w-4 h-4 mr-2" /> {t('admin.orders.status.processing')}
                           </DropdownItem>
                           <DropdownItem onClick={() => handleStatusUpdate(order.id.toString(), 'shipped')}>
-                            <Check className="w-4 h-4 mr-2" /> Shipped
+                            <Check className="w-4 h-4 mr-2" /> {t('admin.orders.status.shipped')}
                           </DropdownItem>
                           <DropdownItem onClick={() => handleStatusUpdate(order.id.toString(), 'delivered')}>
-                            <Check className="w-4 h-4 mr-2 text-green-600" /> Delivered
+                            <Check className="w-4 h-4 mr-2 text-green-600" /> {t('admin.orders.status.delivered')}
                           </DropdownItem>
                           <DropdownDivider />
                           <DropdownItem onClick={() => handleStatusUpdate(order.id.toString(), 'cancelled')}>
-                            <span className="text-red-600">Cancel Order</span>
+                            <span className="text-red-600">{t('admin.orders.cancelOrder')}</span>
                           </DropdownItem>
                         </Dropdown>
                       </div>
@@ -822,7 +824,11 @@ export default function AdminOrdersPage() {
 
         <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
           <div className="text-sm text-gray-600">
-            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredAndSortedOrders.length)} of {filteredAndSortedOrders.length} orders
+            {t('admin.orders.pagination.showing', { 
+              from: ((currentPage - 1) * itemsPerPage) + 1, 
+              to: Math.min(currentPage * itemsPerPage, filteredAndSortedOrders.length), 
+              total: filteredAndSortedOrders.length 
+            })}
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -833,7 +839,7 @@ export default function AdminOrdersPage() {
               <ChevronLeft className="w-5 h-5" />
             </button>
             <span className="text-sm text-gray-600">
-              Page {currentPage} of {totalPages}
+              {t('admin.orders.pagination.page', { current: currentPage, total: totalPages })}
             </span>
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}

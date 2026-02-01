@@ -196,5 +196,310 @@
     "latestLaptops": "أحدث أجهزة الكمبيوتر المحمولة",
     "premiumAudio": "صوت عالي الجودة",
     "copyright": "© 2026 سمارت سيفر Inc. جميع الحقوق محفوظة."
+  },
+  "registerWizard": {
+    "title": "انضم إلى سمارت سيفر",
+    "subtitle": "أكمل الخطوات أدناه لإنشاء حسابك",
+    "step": "الخطوة {{current}} من {{total}}",
+    "percentComplete": "{{percent}}% مكتمل",
+    "steps": {
+      "account": "الحساب",
+      "personal": "شخصي",
+      "address": "العنوان",
+      "profile": "الملف"
+    },
+    "step1": {
+      "title": "إنشاء حسابك",
+      "subtitle": "لنبدأ بمعلوماتك الأساسية",
+      "fullName": "الاسم الكامل",
+      "fullNamePlaceholder": "محمد أحمد",
+      "email": "البريد الإلكتروني",
+      "emailPlaceholder": "mohamed@example.com",
+      "password": "كلمة المرور",
+      "passwordPlaceholder": "أنشئ كلمة مرور قوية",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "confirmPasswordPlaceholder": "تأكيد كلمة المرور",
+      "passwordRequirements": "متطلبات كلمة المرور: 6 أحرف على الأقل",
+      "errors": {
+        "nameRequired": "الاسم الكامل مطلوب",
+        "emailRequired": "البريد الإلكتروني مطلوب",
+        "emailInvalid": "يرجى إدخال بريد إلكتروني صالح",
+        "passwordRequired": "كلمة المرور مطلوبة",
+        "passwordMinLength": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+        "passwordsDontMatch": "كلمات المرور غير متطابقة"
+      }
+    },
+    "step2": {
+      "title": "المعلومات الشخصية",
+      "subtitle": "أضف تفاصيل الاتصال (اختياري)",
+      "phone": "رقم الهاتف",
+      "phonePlaceholder": "+20 123 456 7890",
+      "phoneHelper": "اختياري، لكن يوصى به لتحديثات الطلب"
+    },
+    "step3": {
+      "title": "عنوان التوصيل",
+      "subtitle": "أين يجب أن نوصل طلباتك؟ (اختياري)",
+      "streetAddress": "عنوان الشارع",
+      "streetPlaceholder": "123 شارع الرئيسي، شقة 4ب",
+      "city": "المدينة",
+      "cityPlaceholder": "القاهرة",
+      "country": "الدولة",
+      "countryPlaceholder": "مصر"
+    },
+    "step4": {
+      "title": "صورة الملف الشخصي",
+      "subtitle": "أضف صورة لتخصيص حسابك (اختياري)",
+      "uploadPhoto": "رفع صورة",
+      "fileTypes": "SVG, PNG, JPG أو GIF (بحد أقصى 2 ميجابايت)",
+      "tip": "صورة الملف الشخصي تساعدنا في تخصيص تجربتك",
+      "almostDone": "على وشك الانتهاء! انقر \"إنشاء حساب\" لإكمال التسجيل"
+    },
+    "navigation": {
+      "back": "رجوع",
+      "continue": "متابعة",
+      "createAccount": "إنشاء حساب",
+      "creating": "جاري الإنشاء...",
+      "alreadyHaveAccount": "لديك حساب بالفعل؟",
+      "signIn": "تسجيل الدخول"
+    }
+  },
+  "onboarding": {
+    "title": "مرحباً، {{name}}!",
+    "subtitle": "لنكمل ملفك الشخصي",
+    "step": "الخطوة {{current}} من {{total}}",
+    "percentComplete": "{{percent}}% مكتمل",
+    "steps": {
+      "personal": "شخصي",
+      "address": "العنوان",
+      "photo": "الصورة"
+    },
+    "step1": {
+      "title": "المعلومات الشخصية",
+      "subtitle": "أضف تفاصيل الاتصال",
+      "phone": "رقم الهاتف",
+      "phonePlaceholder": "+20 123 456 7890"
+    },
+    "step2": {
+      "title": "تفاصيل العنوان",
+      "subtitle": "أين يجب أن نوصل طلباتك؟",
+      "streetAddress": "عنوان الشارع",
+      "streetPlaceholder": "123 شارع الرئيسي، شقة 4ب",
+      "city": "المدينة",
+      "cityPlaceholder": "القاهرة",
+      "country": "الدولة",
+      "countryPlaceholder": "مصر"
+    },
+    "step3": {
+      "title": "صورة الملف الشخصي",
+      "subtitle": "أضف صورة لتخصيص حسابك",
+      "uploadPhoto": "رفع صورة",
+      "fileTypes": "SVG, PNG, JPG أو GIF (بحد أقصى 2 ميجابايت)",
+      "tip": "صورة الملف الشخصي تساعدنا في تخصيص تجربتك"
+    },
+    "navigation": {
+      "skip": "تخطي الآن",
+      "continue": "متابعة",
+      "completeProfile": "إكمال الملف",
+      "completing": "جاري الإكمال..."
+    },
+    "success": "تم إكمال الملف بنجاح!"
+  },
+  "admin": {
+    "dashboard": {
+      "title": "لوحة التحكم",
+      "subtitle": "مرحباً بعودتك! إليك ما يحدث في متجرك.",
+      "live": "تحديثات مباشرة",
+      "offline": "غير متصل",
+      "refresh": "تحديث",
+      "refreshed": "تم تحديث اللوحة",
+      "stats": {
+        "totalRevenue": "إجمالي الإيرادات",
+        "totalOrders": "إجمالي الطلبات",
+        "products": "المنتجات",
+        "users": "المستخدمين",
+        "vsLastMonth": "مقارنة بالشهر الماضي"
+      },
+      "monthlySales": "المبيعات الشهرية",
+      "recentOrders": "أحدث الطلبات",
+      "viewAll": "عرض الكل",
+      "quickActions": {
+        "addProduct": "إضافة منتج",
+        "addProductDesc": "إنشاء منتج جديد",
+        "viewOrders": "عرض الطلبات",
+        "viewOrdersDesc": "إدارة جميع الطلبات",
+        "manageUsers": "إدارة المستخدمين",
+        "manageUsersDesc": "عرض حسابات المستخدمين",
+        "analytics": "التحليلات",
+        "analyticsDesc": "عرض التقارير التفصيلية"
+      },
+      "errors": {
+        "unableToLoad": "تعذر تحميل اللوحة",
+        "tryAgain": "المحاولة مرة أخرى"
+      }
+    },
+    "categories": {
+      "title": "التصنيفات",
+      "subtitle": "إدارة تصنيفات المنتجات",
+      "addCategory": "إضافة تصنيف",
+      "searchPlaceholder": "البحث في التصنيفات...",
+      "table": {
+        "name": "الاسم",
+        "description": "الوصف",
+        "products": "المنتجات",
+        "actions": "الإجراءات"
+      },
+      "modal": {
+        "addTitle": "إضافة تصنيف",
+        "editTitle": "تعديل تصنيف",
+        "name": "اسم التصنيف",
+        "namePlaceholder": "أدخل اسم التصنيف",
+        "nameRequired": "اسم التصنيف مطلوب",
+        "description": "الوصف",
+        "descriptionPlaceholder": "أدخل وصف التصنيف (اختياري)",
+        "imageUrl": "رابط الصورة",
+        "imageUrlPlaceholder": "أدخل رابط الصورة (اختياري)",
+        "cancel": "إلغاء",
+        "create": "إنشاء",
+        "update": "تحديث",
+        "creating": "جاري الإنشاء...",
+        "updating": "جاري التحديث..."
+      },
+      "deleteModal": {
+        "title": "حذف التصنيف",
+        "warning": "هل أنت متأكد أنك تريد حذف",
+        "productsWarning": "{{count}} منتجات ستصبح بدون تصنيف. متابعة؟",
+        "cannotUndo": "لا يمكن التراجع عن هذا الإجراء.",
+        "cancel": "إلغاء",
+        "delete": "حذف",
+        "deleting": "جاري الحذف..."
+      },
+      "empty": "لم يتم العثور على تصنيفات"
+    },
+    "products": {
+      "title": "المنتجات",
+      "subtitle": "إدارة كتالوج المنتجات",
+      "addProduct": "إضافة منتج",
+      "searchPlaceholder": "البحث في المنتجات...",
+      "filters": {
+        "allCategories": "جميع التصنيفات",
+        "allStock": "جميع حالات المخزون",
+        "inStock": "متوفر",
+        "lowStock": "مخزون منخفض",
+        "outOfStock": "نفذ من المخزون"
+      },
+      "table": {
+        "image": "الصورة",
+        "name": "الاسم",
+        "price": "السعر",
+        "stock": "المخزون",
+        "category": "التصنيف",
+        "status": "الحالة",
+        "actions": "الإجراءات"
+      },
+      "status": {
+        "active": "نشط",
+        "inactive": "غير نشط"
+      },
+      "modal": {
+        "addTitle": "إضافة منتج",
+        "editTitle": "تعديل منتج",
+        "name": "اسم المنتج",
+        "namePlaceholder": "أدخل اسم المنتج",
+        "nameRequired": "اسم المنتج مطلوب",
+        "category": "التصنيف",
+        "categoryRequired": "التصنيف مطلوب",
+        "price": "السعر",
+        "priceRequired": "السعر مطلوب",
+        "oldPrice": "السعر القديم",
+        "stock": "كمية المخزون",
+        "stockRequired": "المخزون مطلوب",
+        "sku": "رمز المنتج",
+        "skuPlaceholder": "رمز المنتج (اختياري)",
+        "description": "الوصف",
+        "descriptionPlaceholder": "أدخل وصف المنتج (اختياري)",
+        "imageUrl": "رابط الصورة",
+        "imageFile": "رفع صورة",
+        "status": "الحالة",
+        "cancel": "إلغاء",
+        "create": "إنشاء منتج",
+        "update": "تحديث منتج",
+        "creating": "جاري الإنشاء...",
+        "updating": "جاري التحديث..."
+      },
+      "bulkActions": {
+        "selected": "{{count}} منتجات محددة",
+        "clear": "مسح",
+        "updateStatus": "تحديث الحالة",
+        "changeCategory": "تغيير التصنيف",
+        "delete": "حذف المحدد"
+      },
+      "csv": {
+        "import": "استيراد",
+        "export": "تصدير",
+        "template": "تحميل القالب"
+      },
+      "empty": "لم يتم العثور على منتجات"
+    },
+    "orders": {
+      "title": "الطلبات",
+      "subtitle": "إدارة ومتابعة جميع طلبات العملاء",
+      "searchPlaceholder": "البحث في الطلبات...",
+      "export": "تصدير",
+      "filters": {
+        "allStatuses": "جميع الحالات",
+        "pending": "معلق",
+        "confirmed": "مؤكد",
+        "processing": "قيد المعالجة",
+        "shipped": "تم الشحن",
+        "delivered": "تم التوصيل",
+        "cancelled": "ملغي"
+      },
+      "table": {
+        "orderNumber": "رقم الطلب",
+        "customer": "العميل",
+        "items": "العناصر",
+        "total": "الإجمالي",
+        "status": "الحالة",
+        "date": "التاريخ",
+        "actions": "الإجراءات"
+      },
+      "status": {
+        "pending": "معلق",
+        "confirmed": "مؤكد",
+        "processing": "قيد المعالجة",
+        "shipped": "تم الشحن",
+        "delivered": "تم التوصيل",
+        "cancelled": "ملغي"
+      },
+      "bulkActions": {
+        "selected": "{{count}} طلبات محددة",
+        "clear": "مسح",
+        "updateStatus": "تحديث الحالة"
+      },
+      "modal": {
+        "title": "طلب #{{id}}",
+        "customer": "العميل",
+        "shipping": "عنوان الشحن",
+        "orderDetails": "تفاصيل الطلب",
+        "payment": "الدفع",
+        "orderItems": "عناصر الطلب",
+        "actions": {
+          "print": "طباعة الطلب",
+          "email": "إرسال بريد للعميل",
+          "updateStatus": "تحديث الحالة"
+        },
+        "close": "إغلاق"
+      },
+      "empty": "لم يتم العثور على طلبات"
+    },
+    "sidebar": {
+      "dashboard": "اللوحة",
+      "orders": "الطلبات",
+      "products": "المنتجات",
+      "categories": "التصنيفات",
+      "users": "المستخدمين",
+      "settings": "الإعدادات",
+      "logout": "تسجيل الخروج"
+    }
   }
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Plus,
   Search,
@@ -38,6 +39,7 @@ interface AdminProduct extends Product {
 }
 
 export default function AdminProductsPage() {
+  const { t } = useTranslation();
   const { data: productsData, loading: loadingProducts, error: errorProducts, execute: executeGetProducts } = useGet<AdminProduct[]>();
   const { data: categoriesData, execute: executeGetCategories } = useGet<Category[]>();
   const { loading: creating, execute: executeCreate } = usePost<AdminProduct>();
@@ -101,9 +103,9 @@ export default function AdminProductsPage() {
   };
 
   const getStockStatus = (stock: number): { label: string; className: string } => {
-    if (stock === 0) return { label: 'Out of Stock', className: 'bg-red-100 text-red-800' };
-    if (stock < 5) return { label: 'Low Stock', className: 'bg-red-100 text-red-800' };
-    return { label: 'In Stock', className: 'bg-green-100 text-green-800' };
+    if (stock === 0) return { label: t('admin.products.stock.outOfStock'), className: 'bg-red-100 text-red-800' };
+    if (stock < 5) return { label: t('admin.products.stock.lowStock'), className: 'bg-red-100 text-red-800' };
+    return { label: t('admin.products.stock.inStock'), className: 'bg-green-100 text-green-800' };
   };
 
   const filteredAndSortedProducts = useMemo(() => {
@@ -218,20 +220,20 @@ export default function AdminProductsPage() {
     if (editingProduct) {
       const result = await executeUpdate(`/api/products/${editingProduct.id}`, payload);
       if (result) {
-        toast.success('Product updated successfully');
+        toast.success(t('admin.products.success.updated'));
         fetchProducts();
         closeModal();
       } else {
-        toast.error('Failed to update product');
+        toast.error(t('admin.products.errors.updateFailed'));
       }
     } else {
       const result = await executeCreate('/api/products', payload);
       if (result) {
-        toast.success('Product created successfully');
+        toast.success(t('admin.products.success.created'));
         fetchProducts();
         closeModal();
       } else {
-        toast.error('Failed to create product');
+        toast.error(t('admin.products.errors.createFailed'));
       }
     }
   };
@@ -251,11 +253,11 @@ export default function AdminProductsPage() {
 
     const result = await executeDelete(`/api/products/${productToDelete.id}`);
     if (result !== null) {
-      toast.success('Product deleted successfully');
+      toast.success(t('admin.products.success.deleted'));
       fetchProducts();
       closeDeleteModal();
     } else {
-      toast.error('Failed to delete product');
+      toast.error(t('admin.products.errors.deleteFailed'));
     }
   };
 
@@ -276,7 +278,7 @@ export default function AdminProductsPage() {
     );
 
     await Promise.all(deletePromises);
-    toast.success(`${selectedProducts.size} products deleted successfully`);
+    toast.success(t('admin.products.success.bulkDeleted', { count: selectedProducts.size }));
     setSelectedProducts(new Set());
     fetchProducts();
     closeBulkDeleteModal();
@@ -290,7 +292,7 @@ export default function AdminProductsPage() {
     );
 
     await Promise.all(updatePromises);
-    toast.success(`Updated category for ${selectedProducts.size} products`);
+    toast.success(t('admin.products.success.bulkCategoryUpdated', { count: selectedProducts.size }));
     setSelectedProducts(new Set());
     fetchProducts();
   };
@@ -307,7 +309,7 @@ export default function AdminProductsPage() {
     );
 
     await Promise.all(updatePromises);
-    toast.success(`Set ${selectedProducts.size} products to ${newStatus}`);
+    toast.success(t('admin.products.success.bulkStatusUpdated', { count: selectedProducts.size, status: newStatus }));
     setSelectedProducts(new Set());
     fetchProducts();
   };
@@ -328,10 +330,10 @@ export default function AdminProductsPage() {
     });
 
     if (result !== null) {
-      toast.success('Products imported successfully');
+      toast.success(t('admin.products.success.imported'));
       fetchProducts();
     } else {
-      toast.error('Failed to import products');
+      toast.error(t('admin.products.errors.importFailed'));
     }
 
     if (fileInputRef.current) {
@@ -350,9 +352,9 @@ export default function AdminProductsPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      toast.success('Products exported successfully');
+      toast.success(t('admin.products.success.exported'));
     } else {
-      toast.error('Failed to export products');
+      toast.error(t('admin.products.errors.exportFailed'));
     }
   };
 
@@ -367,9 +369,9 @@ export default function AdminProductsPage() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      toast.success('Template downloaded successfully');
+      toast.success(t('admin.products.success.templateDownloaded'));
     } else {
-      toast.error('Failed to download template');
+      toast.error(t('admin.products.errors.templateDownloadFailed'));
     }
   };
 
@@ -384,7 +386,7 @@ export default function AdminProductsPage() {
 
   const getCategoryName = (categoryId: number) => {
     const category = categories.find(c => c.id === categoryId);
-    return category?.name || 'Uncategorized';
+    return category?.name || t('admin.products.uncategorized');
   };
 
   if (loadingProducts && products.length === 0) {
@@ -404,12 +406,12 @@ export default function AdminProductsPage() {
   if (errorProducts && products.length === 0) {
     return (
       <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Unable to load products</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('admin.products.errors.unableToLoad')}</h1>
         <button 
           onClick={fetchProducts}
           className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
         >
-          Try Again
+          {t('admin.products.errors.tryAgain')}
         </button>
       </div>
     );
@@ -419,13 +421,13 @@ export default function AdminProductsPage() {
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Products</h1>
-          <p className="text-gray-600">Manage your product catalog</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('admin.products.title')}</h1>
+          <p className="text-gray-600">{t('admin.products.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button color="gray" onClick={handleImportClick} disabled={importing}>
             <Upload className="w-4 h-4 mr-2" />
-            {importing ? 'Importing...' : 'Import'}
+            {importing ? t('admin.products.importing') : t('admin.products.import')}
           </Button>
           <input
             type="file"
@@ -440,20 +442,20 @@ export default function AdminProductsPage() {
             renderTrigger={() => (
               <Button color="gray">
                 <Download className="w-4 h-4 mr-2" />
-                Export
+                {t('admin.products.export')}
               </Button>
             )}
           >
             <DropdownItem onClick={handleExport}>
-              <Download className="w-4 h-4 mr-2" /> Export Products
+              <Download className="w-4 h-4 mr-2" /> {t('admin.products.exportProducts')}
             </DropdownItem>
             <DropdownItem onClick={handleDownloadTemplate}>
-              <FileSpreadsheet className="w-4 h-4 mr-2" /> Download Template
+              <FileSpreadsheet className="w-4 h-4 mr-2" /> {t('admin.products.downloadTemplate')}
             </DropdownItem>
           </Dropdown>
           <Button className="bg-gray-900 hover:bg-gray-800 text-white" onClick={openAddModal}>
             <Plus className="w-4 h-4 mr-2" />
-            Add Product
+            {t('admin.products.addProduct')}
           </Button>
         </div>
       </div>
@@ -478,7 +480,7 @@ export default function AdminProductsPage() {
                 onChange={(e) => setCategoryFilter(e.target.value)}
                 className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
               >
-                <option value="all">All Categories</option>
+                <option value="all">{t('admin.products.filters.allCategories')}</option>
                 {categories.map(category => (
                   <option key={category.id} value={category.id.toString()}>
                     {category.name}
@@ -493,10 +495,10 @@ export default function AdminProductsPage() {
                 onChange={(e) => setStockFilter(e.target.value as StockFilter)}
                 className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
               >
-                <option value="all">All Stock</option>
-                <option value="in_stock">In Stock</option>
-                <option value="low_stock">Low Stock (&lt;5)</option>
-                <option value="out_of_stock">Out of Stock</option>
+                <option value="all">{t('admin.products.filters.allStock')}</option>
+                <option value="in_stock">{t('admin.products.stock.inStock')}</option>
+                <option value="low_stock">{t('admin.products.filters.lowStock')}</option>
+                <option value="out_of_stock">{t('admin.products.stock.outOfStock')}</option>
               </select>
             </div>
           </div>
@@ -506,14 +508,14 @@ export default function AdminProductsPage() {
       {selectedProducts.size > 0 && (
         <Card className="mb-4 bg-gray-50">
           <div className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <span className="text-sm text-gray-600">{selectedProducts.size} products selected</span>
+            <span className="text-sm text-gray-600">{t('admin.products.selected', { count: selectedProducts.size })}</span>
             <div className="flex flex-wrap gap-2">
               <select
                 onChange={(e) => handleBulkCategoryChange(e.target.value)}
                 value=""
                 className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
               >
-                <option value="">Change Category</option>
+                <option value="">{t('admin.products.changeCategory')}</option>
                 {categories.map(category => (
                   <option key={category.id} value={category.id.toString()}>
                     {category.name}
@@ -522,14 +524,14 @@ export default function AdminProductsPage() {
               </select>
               <Button color="gray" size="sm" onClick={handleBulkStatusToggle}>
                 <Eye className="w-4 h-4 mr-1" />
-                Toggle Status
+                {t('admin.products.toggleStatus')}
               </Button>
               <Button color="gray" size="sm" onClick={openBulkDeleteModal} className="bg-red-600 hover:bg-red-700 text-white">
                 <Trash2 className="w-4 h-4 mr-1" />
-                Delete
+                {t('admin.products.delete')}
               </Button>
               <Button color="gray" size="sm" onClick={() => setSelectedProducts(new Set())}>
-                Clear
+                {t('admin.products.clear')}
               </Button>
             </div>
           </div>
@@ -549,13 +551,13 @@ export default function AdminProductsPage() {
                     className="w-4 h-4 rounded border-gray-300"
                   />
                 </th>
-                <th className="px-4 py-3 text-sm font-medium text-gray-700">Image</th>
+                <th className="px-4 py-3 text-sm font-medium text-gray-700">{t('admin.products.table.image')}</th>
                 <th
                   className="px-4 py-3 text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('name')}
                 >
                   <div className="flex items-center gap-1">
-                    Name
+                    {t('admin.products.table.name')}
                     <SortIcon field="name" />
                   </div>
                 </th>
@@ -564,7 +566,7 @@ export default function AdminProductsPage() {
                   onClick={() => handleSort('price')}
                 >
                   <div className="flex items-center gap-1">
-                    Price
+                    {t('admin.products.table.price')}
                     <SortIcon field="price" />
                   </div>
                 </th>
@@ -573,7 +575,7 @@ export default function AdminProductsPage() {
                   onClick={() => handleSort('stock')}
                 >
                   <div className="flex items-center gap-1">
-                    Stock
+                    {t('admin.products.table.stock')}
                     <SortIcon field="stock" />
                   </div>
                 </th>
@@ -582,7 +584,7 @@ export default function AdminProductsPage() {
                   onClick={() => handleSort('category')}
                 >
                   <div className="flex items-center gap-1">
-                    Category
+                    {t('admin.products.table.category')}
                     <SortIcon field="category" />
                   </div>
                 </th>
@@ -591,18 +593,18 @@ export default function AdminProductsPage() {
                   onClick={() => handleSort('status')}
                 >
                   <div className="flex items-center gap-1">
-                    Status
+                    {t('admin.products.table.status')}
                     <SortIcon field="status" />
                   </div>
                 </th>
-                <th className="px-4 py-3 text-sm font-medium text-gray-700">Actions</th>
+                <th className="px-4 py-3 text-sm font-medium text-gray-700">{t('admin.products.table.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {paginatedProducts.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
-                    No products found
+                    {t('admin.products.empty')}
                   </td>
                 </tr>
               ) : (
@@ -664,9 +666,9 @@ export default function AdminProductsPage() {
                             : 'bg-gray-100 text-gray-600'
                         }`}>
                           {product.status === 'active' ? (
-                            <><Eye className="w-3 h-3 mr-1" /> Active</>
+                            <><Eye className="w-3 h-3 mr-1" /> {t('admin.products.status.active')}</>
                           ) : (
-                            <><EyeOff className="w-3 h-3 mr-1" /> Inactive</>
+                            <><EyeOff className="w-3 h-3 mr-1" /> {t('admin.products.status.inactive')}</>
                           )}
                         </span>
                       </td>
@@ -697,7 +699,11 @@ export default function AdminProductsPage() {
         {totalPages > 1 && (
           <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredAndSortedProducts.length)} of {filteredAndSortedProducts.length} products
+              {t('admin.products.pagination.showing', { 
+                from: ((currentPage - 1) * itemsPerPage) + 1, 
+                to: Math.min(currentPage * itemsPerPage, filteredAndSortedProducts.length), 
+                total: filteredAndSortedProducts.length 
+              })}
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -708,7 +714,7 @@ export default function AdminProductsPage() {
                 <ChevronLeft className="w-5 h-5" />
               </button>
               <span className="text-sm text-gray-600">
-                Page {currentPage} of {totalPages}
+                {t('admin.products.pagination.page', { current: currentPage, total: totalPages })}
               </span>
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
@@ -736,20 +742,20 @@ export default function AdminProductsPage() {
         <ModalHeader>
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-red-500" />
-            Delete Product
+            {t('admin.products.deleteModal.title')}
           </div>
         </ModalHeader>
         <ModalBody>
           <p className="text-gray-600">
-            Are you sure you want to delete <strong>{productToDelete?.name}</strong>?
+            {t('admin.products.deleteModal.confirm', { name: productToDelete?.name })}
           </p>
           <p className="text-sm text-gray-500 mt-2">
-            This action cannot be undone.
+            {t('admin.products.deleteModal.cannotUndo')}
           </p>
         </ModalBody>
         <ModalFooter>
           <Button color="gray" onClick={closeDeleteModal}>
-            Cancel
+            {t('admin.products.deleteModal.cancel')}
           </Button>
           <Button 
             color="gray" 
@@ -757,7 +763,7 @@ export default function AdminProductsPage() {
             disabled={deleting}
             className="bg-red-600 hover:bg-red-700 text-white"
           >
-            {deleting ? 'Deleting...' : 'Delete'}
+            {deleting ? t('admin.products.deleteModal.deleting') : t('admin.products.deleteModal.delete')}
           </Button>
         </ModalFooter>
       </Modal>
@@ -766,20 +772,20 @@ export default function AdminProductsPage() {
         <ModalHeader>
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-red-500" />
-            Bulk Delete Products
+            {t('admin.products.bulkDeleteModal.title')}
           </div>
         </ModalHeader>
         <ModalBody>
           <p className="text-gray-600">
-            Are you sure you want to delete <strong>{selectedProducts.size} products</strong>?
+            {t('admin.products.bulkDeleteModal.confirm', { count: selectedProducts.size })}
           </p>
           <p className="text-sm text-gray-500 mt-2">
-            This action cannot be undone.
+            {t('admin.products.deleteModal.cannotUndo')}
           </p>
         </ModalBody>
         <ModalFooter>
           <Button color="gray" onClick={closeBulkDeleteModal}>
-            Cancel
+            {t('admin.products.deleteModal.cancel')}
           </Button>
           <Button 
             color="gray" 
@@ -787,7 +793,7 @@ export default function AdminProductsPage() {
             disabled={deleting}
             className="bg-red-600 hover:bg-red-700 text-white"
           >
-            {deleting ? 'Deleting...' : 'Delete All'}
+            {deleting ? t('admin.products.deleteModal.deleting') : t('admin.products.bulkDeleteModal.deleteAll')}
           </Button>
         </ModalFooter>
       </Modal>

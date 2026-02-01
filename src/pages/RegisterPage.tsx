@@ -82,7 +82,7 @@ export default function RegisterPage() {
       });
       login(response.data);
       toast.success("Account created successfully!");
-      navigate("/home");
+      navigate("/onboarding");
     } catch (error) {
       console.error("Registration Error:", error);
       const errorMessage =

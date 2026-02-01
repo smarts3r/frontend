@@ -1,4 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   LayoutDashboard, 
   ShoppingCart, 
@@ -23,6 +24,7 @@ interface AdminSidebarProps {
 export default function AdminSidebar({ isOpen, onClose, isConnected }: AdminSidebarProps) {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [collapsed, setCollapsed] = useState(false);
 
   const handleLogout = () => {
@@ -31,12 +33,12 @@ export default function AdminSidebar({ isOpen, onClose, isConnected }: AdminSide
   };
 
   const navItems = [
-    { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
-    { path: '/admin/products', icon: Package, label: 'Products' },
-    { path: '/admin/categories', icon: Folder, label: 'Categories' },
-    { path: '/admin/users', icon: Users, label: 'Users' },
-    { path: '/admin/settings', icon: Settings, label: 'Settings' },
+    { path: '/admin', icon: LayoutDashboard, label: t('admin.sidebar.dashboard') },
+    { path: '/admin/orders', icon: ShoppingCart, label: t('admin.sidebar.orders') },
+    { path: '/admin/products', icon: Package, label: t('admin.sidebar.products') },
+    { path: '/admin/categories', icon: Folder, label: t('admin.sidebar.categories') },
+    { path: '/admin/users', icon: Users, label: t('admin.sidebar.users') },
+    { path: '/admin/settings', icon: Settings, label: t('admin.sidebar.settings') },
   ];
 
   const sidebarWidth = collapsed ? 'w-20' : 'w-64';
@@ -115,10 +117,10 @@ export default function AdminSidebar({ isOpen, onClose, isConnected }: AdminSide
             </div>
             {!collapsed && (
               <div className="min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{user?.username || 'Admin'}</p>
+                <p className="text-sm font-medium text-gray-900 truncate">{user?.username || t('admin.sidebar.admin')}</p>
                 <div className="flex items-center gap-1.5">
                   <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-                  <span className="text-xs text-gray-500">{isConnected ? 'Live' : 'Offline'}</span>
+                  <span className="text-xs text-gray-500">{isConnected ? t('admin.sidebar.live') : t('admin.sidebar.offline')}</span>
                 </div>
               </div>
             )}
@@ -129,7 +131,7 @@ export default function AdminSidebar({ isOpen, onClose, isConnected }: AdminSide
             className={`flex items-center gap-2 text-sm text-red-600 hover:text-red-700 font-medium ${collapsed ? 'justify-center w-full' : ''}`}
           >
             <LogOut className="w-4 h-4" />
-            {!collapsed && <span>Logout</span>}
+            {!collapsed && <span>{t('admin.sidebar.logout')}</span>}
           </button>
         </div>
       </aside>

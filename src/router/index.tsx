@@ -11,11 +11,13 @@ import CartPage from "@/pages/CartPage";
 import CheckoutPage from "@/pages/CheckoutPage";
 import HomePage from "@/pages/HomePage";
 import LoginPage from "@/pages/LoginPage";
+import OnboardingPage from "@/pages/OnboardingPage";
 import OrdersPage from "@/pages/OrdersPage";
 import CategoriesPage from "@/pages/CategoriesPage";
 import ProductsPage from "@/pages/ProductsPage";
 import ProfilePage from "@/pages/ProfilePage";
 import RegisterPage from "@/pages/RegisterPage";
+import RegisterWizardPage from "@/pages/RegisterWizardPage";
 import WishlistPage from "@/pages/WishlistPage";
 import { ProductDetailsPage } from "@/pages/ProductDetailsPage";
 
@@ -26,7 +28,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/register",
-    element: <RegisterPage />,
+    element: <RegisterWizardPage />,
+  },
+  {
+    path: "/onboarding",
+    element: <OnboardingPage />,
   },
   {
     path: "/",

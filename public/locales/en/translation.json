@@ -197,5 +197,310 @@
     "latestLaptops": "Latest Laptops",
     "premiumAudio": "Premium Audio",
     "copyright": "© 2026 Smart S3r Inc. All rights reserved."
+  },
+  "registerWizard": {
+    "title": "Join Smart S3r",
+    "subtitle": "Complete the steps below to create your account",
+    "step": "Step {{current}} of {{total}}",
+    "percentComplete": "{{percent}}% Complete",
+    "steps": {
+      "account": "Account",
+      "personal": "Personal",
+      "address": "Address",
+      "profile": "Profile"
+    },
+    "step1": {
+      "title": "Create Your Account",
+      "subtitle": "Let's get started with your basic information",
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "John Doe",
+      "email": "Email Address",
+      "emailPlaceholder": "john@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "Create a strong password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm your password",
+      "passwordRequirements": "Password requirements: Minimum 6 characters",
+      "errors": {
+        "nameRequired": "Full name is required",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email",
+        "passwordRequired": "Password is required",
+        "passwordMinLength": "Password must be at least 6 characters",
+        "passwordsDontMatch": "Passwords do not match"
+      }
+    },
+    "step2": {
+      "title": "Personal Information",
+      "subtitle": "Add your contact details (optional)",
+      "phone": "Phone Number",
+      "phonePlaceholder": "+20 123 456 7890",
+      "phoneHelper": "Optional, but recommended for order updates"
+    },
+    "step3": {
+      "title": "Delivery Address",
+      "subtitle": "Where should we deliver your orders? (optional)",
+      "streetAddress": "Street Address",
+      "streetPlaceholder": "123 Main Street, Apt 4B",
+      "city": "City",
+      "cityPlaceholder": "Cairo",
+      "country": "Country",
+      "countryPlaceholder": "Egypt"
+    },
+    "step4": {
+      "title": "Profile Photo",
+      "subtitle": "Add a photo to personalize your account (optional)",
+      "uploadPhoto": "Upload Photo",
+      "fileTypes": "SVG, PNG, JPG or GIF (MAX. 2MB)",
+      "tip": "A profile photo helps us personalize your experience",
+      "almostDone": "Almost done! Click \"Create Account\" to complete your registration"
+    },
+    "navigation": {
+      "back": "Back",
+      "continue": "Continue",
+      "createAccount": "Create Account",
+      "creating": "Creating Account...",
+      "alreadyHaveAccount": "Already have an account?",
+      "signIn": "Sign in"
+    }
+  },
+  "onboarding": {
+    "title": "Welcome, {{name}}!",
+    "subtitle": "Let's complete your profile",
+    "step": "Step {{current}} of {{total}}",
+    "percentComplete": "{{percent}}% Complete",
+    "steps": {
+      "personal": "Personal",
+      "address": "Address",
+      "photo": "Photo"
+    },
+    "step1": {
+      "title": "Personal Information",
+      "subtitle": "Add your contact details",
+      "phone": "Phone Number",
+      "phonePlaceholder": "+20 123 456 7890"
+    },
+    "step2": {
+      "title": "Address Details",
+      "subtitle": "Where should we deliver your orders?",
+      "streetAddress": "Street Address",
+      "streetPlaceholder": "123 Main Street, Apt 4B",
+      "city": "City",
+      "cityPlaceholder": "Cairo",
+      "country": "Country",
+      "countryPlaceholder": "Egypt"
+    },
+    "step3": {
+      "title": "Profile Photo",
+      "subtitle": "Add a photo to personalize your account",
+      "uploadPhoto": "Upload Photo",
+      "fileTypes": "SVG, PNG, JPG or GIF (MAX. 2MB)",
+      "tip": "A profile photo helps us personalize your experience"
+    },
+    "navigation": {
+      "skip": "Skip for now",
+      "continue": "Continue",
+      "completeProfile": "Complete Profile",
+      "completing": "Completing..."
+    },
+    "success": "Profile completed successfully!"
+  },
+  "admin": {
+    "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "Welcome back! Here's what's happening with your store.",
+      "live": "Live updates",
+      "offline": "Offline",
+      "refresh": "Refresh",
+      "refreshed": "Dashboard refreshed",
+      "stats": {
+        "totalRevenue": "Total Revenue",
+        "totalOrders": "Total Orders",
+        "products": "Products",
+        "users": "Users",
+        "vsLastMonth": "vs last month"
+      },
+      "monthlySales": "Monthly Sales",
+      "recentOrders": "Recent Orders",
+      "viewAll": "View all",
+      "quickActions": {
+        "addProduct": "Add Product",
+        "addProductDesc": "Create a new product",
+        "viewOrders": "View Orders",
+        "viewOrdersDesc": "Manage all orders",
+        "manageUsers": "Manage Users",
+        "manageUsersDesc": "View user accounts",
+        "analytics": "Analytics",
+        "analyticsDesc": "View detailed reports"
+      },
+      "errors": {
+        "unableToLoad": "Unable to load dashboard",
+        "tryAgain": "Try Again"
+      }
+    },
+    "categories": {
+      "title": "Categories",
+      "subtitle": "Manage product categories",
+      "addCategory": "Add Category",
+      "searchPlaceholder": "Search categories...",
+      "table": {
+        "name": "Name",
+        "description": "Description",
+        "products": "Products",
+        "actions": "Actions"
+      },
+      "modal": {
+        "addTitle": "Add Category",
+        "editTitle": "Edit Category",
+        "name": "Category Name",
+        "namePlaceholder": "Enter category name",
+        "nameRequired": "Category name is required",
+        "description": "Description",
+        "descriptionPlaceholder": "Enter category description (optional)",
+        "imageUrl": "Image URL",
+        "imageUrlPlaceholder": "Enter image URL (optional)",
+        "cancel": "Cancel",
+        "create": "Create",
+        "update": "Update",
+        "creating": "Creating...",
+        "updating": "Updating..."
+      },
+      "deleteModal": {
+        "title": "Delete Category",
+        "warning": "Are you sure you want to delete",
+        "productsWarning": "{{count}} products will become uncategorized. Continue?",
+        "cannotUndo": "This action cannot be undone.",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "deleting": "Deleting..."
+      },
+      "empty": "No categories found"
+    },
+    "products": {
+      "title": "Products",
+      "subtitle": "Manage your product catalog",
+      "addProduct": "Add Product",
+      "searchPlaceholder": "Search products...",
+      "filters": {
+        "allCategories": "All Categories",
+        "allStock": "All Stock Status",
+        "inStock": "In Stock",
+        "lowStock": "Low Stock",
+        "outOfStock": "Out of Stock"
+      },
+      "table": {
+        "image": "Image",
+        "name": "Name",
+        "price": "Price",
+        "stock": "Stock",
+        "category": "Category",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive"
+      },
+      "modal": {
+        "addTitle": "Add Product",
+        "editTitle": "Edit Product",
+        "name": "Product Name",
+        "namePlaceholder": "Enter product name",
+        "nameRequired": "Product name is required",
+        "category": "Category",
+        "categoryRequired": "Category is required",
+        "price": "Price",
+        "priceRequired": "Price is required",
+        "oldPrice": "Old Price",
+        "stock": "Stock Quantity",
+        "stockRequired": "Stock is required",
+        "sku": "SKU",
+        "skuPlaceholder": "Product SKU (optional)",
+        "description": "Description",
+        "descriptionPlaceholder": "Enter product description (optional)",
+        "imageUrl": "Image URL",
+        "imageFile": "Upload Image",
+        "status": "Status",
+        "cancel": "Cancel",
+        "create": "Create Product",
+        "update": "Update Product",
+        "creating": "Creating...",
+        "updating": "Updating..."
+      },
+      "bulkActions": {
+        "selected": "{{count}} products selected",
+        "clear": "Clear",
+        "updateStatus": "Update Status",
+        "changeCategory": "Change Category",
+        "delete": "Delete Selected"
+      },
+      "csv": {
+        "import": "Import",
+        "export": "Export",
+        "template": "Download Template"
+      },
+      "empty": "No products found"
+    },
+    "orders": {
+      "title": "Orders",
+      "subtitle": "Manage and track all customer orders",
+      "searchPlaceholder": "Search orders...",
+      "export": "Export",
+      "filters": {
+        "allStatuses": "All Statuses",
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "processing": "Processing",
+        "shipped": "Shipped",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled"
+      },
+      "table": {
+        "orderNumber": "Order #",
+        "customer": "Customer",
+        "items": "Items",
+        "total": "Total",
+        "status": "Status",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "status": {
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "processing": "Processing",
+        "shipped": "Shipped",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled"
+      },
+      "bulkActions": {
+        "selected": "{{count}} orders selected",
+        "clear": "Clear",
+        "updateStatus": "Update Status"
+      },
+      "modal": {
+        "title": "Order #{{id}}",
+        "customer": "Customer",
+        "shipping": "Shipping Address",
+        "orderDetails": "Order Details",
+        "payment": "Payment",
+        "orderItems": "Order Items",
+        "actions": {
+          "print": "Print Order",
+          "email": "Email Customer",
+          "updateStatus": "Update Status"
+        },
+        "close": "Close"
+      },
+      "empty": "No orders found"
+    },
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "orders": "Orders",
+      "products": "Products",
+      "categories": "Categories",
+      "users": "Users",
+      "settings": "Settings",
+      "logout": "Logout"
+    }
   }
 }

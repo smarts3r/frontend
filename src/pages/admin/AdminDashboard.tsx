@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { 
   DollarSign, 
   ShoppingCart, 
@@ -28,6 +29,7 @@ import type { AdminDashboardData, AdminOrder } from '@/types';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const formatCurrency = useCurrencyFormat();
   const { data: dashboardData, loading, error, getAdminDashboard } = useGetAdminDashboard();
   const { data: ordersData, getAdminOrders } = useGetAdminOrders();
@@ -71,7 +73,7 @@ export default function AdminDashboard() {
   const handleRefresh = () => {
     getAdminDashboard();
     getAdminOrders();
-    toast.success('Dashboard refreshed');
+    toast.success(t('admin.dashboard.refreshed'));
   };
 
   const StatCard = ({ 
@@ -111,7 +113,7 @@ export default function AdminDashboard() {
               <span className={`text-sm font-medium ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
                 {Math.abs(growth)}%
               </span>
-              <span className="text-sm text-gray-600 ml-1">vs last month</span>
+              <span className="text-sm text-gray-600 ml-1">{t('admin.dashboard.stats.vsLastMonth')}</span>
             </div>
           )}
         </div>
@@ -157,13 +159,13 @@ export default function AdminDashboard() {
   if (error && !stats) {
     return (
       <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Unable to load dashboard</h1>
-        <p className="text-red-600 mb-4">{error.message || 'Unknown error occurred'}</p>
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('admin.dashboard.errors.unableToLoad')}</h1>
+        <p className="text-red-600 mb-4">{error.message || t('admin.dashboard.errors.unknownError')}</p>
         <button 
           onClick={handleRefresh}
           className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
         >
-          Try Again
+          {t('admin.dashboard.errors.tryAgain')}
         </button>
       </div>
     );
@@ -175,17 +177,18 @@ export default function AdminDashboard() {
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600">Welcome back! Here's what's happening with your store.</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('admin.dashboard.title')}</h1>
+          <p className="text-gray-600">{t('admin.dashboard.subtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
-            {isConnected ? 'Live updates' : 'Offline'}
+            {isConnected ? t('admin.dashboard.live') : t('admin.dashboard.offline')}
           </div>
           <button
             onClick={handleRefresh}
             className="p-2 rounded-lg hover:bg-gray-100"
+            title={t('admin.dashboard.refresh')}
           >
             <RefreshCw className="w-5 h-5 text-gray-600" />
           </button>
@@ -194,28 +197,28 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
-          title="Total Revenue"
+          title={t('admin.dashboard.stats.totalRevenue')}
           value={formatCurrency(stats?.totalRevenue || 0)}
           icon={DollarSign}
           growth={stats?.revenueGrowth}
           color="bg-green-500"
         />
         <StatCard
-          title="Total Orders"
+          title={t('admin.dashboard.stats.totalOrders')}
           value={(stats?.totalOrders || 0).toString()}
           icon={ShoppingCart}
           growth={stats?.ordersGrowth}
           color="bg-blue-500"
         />
         <StatCard
-          title="Products"
+          title={t('admin.dashboard.stats.products')}
           value={(stats?.totalProducts || 0).toString()}
           icon={Package}
           growth={stats?.productsGrowth}
           color="bg-purple-500"
         />
         <StatCard
-          title="Users"
+          title={t('admin.dashboard.stats.users')}
           value={(stats?.totalUsers || 0).toString()}
           icon={Users}
           growth={stats?.usersGrowth}
@@ -226,7 +229,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <Card className="lg:col-span-2">
           <div className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Monthly Sales</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('admin.dashboard.monthlySales')}</h2>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
@@ -254,17 +257,17 @@ export default function AdminDashboard() {
         <Card>
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
+              <h2 className="text-lg font-semibold text-gray-900">{t('admin.dashboard.recentOrders')}</h2>
               <button 
                 onClick={() => navigate('/admin/orders')}
                 className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
               >
-                View all <ArrowRight className="w-4 h-4" />
+                {t('admin.dashboard.viewAll')} <ArrowRight className="w-4 h-4" />
               </button>
             </div>
             <div className="space-y-4">
               {recentOrders.length === 0 ? (
-                <p className="text-gray-500 text-center py-4">No recent orders</p>
+                <p className="text-gray-500 text-center py-4">{t('admin.dashboard.noRecentOrders')}</p>
               ) : (
                 recentOrders.map((order) => (
                   <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -293,32 +296,32 @@ export default function AdminDashboard() {
           className="p-6 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors text-left"
         >
           <Package className="w-8 h-8 text-gray-600 mb-3" />
-          <p className="font-medium text-gray-900">Add Product</p>
-          <p className="text-sm text-gray-600">Create a new product</p>
+          <p className="font-medium text-gray-900">{t('admin.dashboard.quickActions.addProduct')}</p>
+          <p className="text-sm text-gray-600">{t('admin.dashboard.quickActions.addProductDesc')}</p>
         </button>
         <button
           onClick={() => navigate('/admin/orders')}
           className="p-6 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors text-left"
         >
           <ShoppingCart className="w-8 h-8 text-gray-600 mb-3" />
-          <p className="font-medium text-gray-900">View Orders</p>
-          <p className="text-sm text-gray-600">Manage all orders</p>
+          <p className="font-medium text-gray-900">{t('admin.dashboard.quickActions.viewOrders')}</p>
+          <p className="text-sm text-gray-600">{t('admin.dashboard.quickActions.viewOrdersDesc')}</p>
         </button>
         <button
           onClick={() => navigate('/admin/users')}
           className="p-6 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors text-left"
         >
           <Users className="w-8 h-8 text-gray-600 mb-3" />
-          <p className="font-medium text-gray-900">Manage Users</p>
-          <p className="text-sm text-gray-600">View user accounts</p>
+          <p className="font-medium text-gray-900">{t('admin.dashboard.quickActions.manageUsers')}</p>
+          <p className="text-sm text-gray-600">{t('admin.dashboard.quickActions.manageUsersDesc')}</p>
         </button>
         <button
           onClick={() => navigate('/admin/settings')}
           className="p-6 bg-white border border-gray-200 rounded-lg hover:border-gray-300 transition-colors text-left"
         >
           <TrendingUp className="w-8 h-8 text-gray-600 mb-3" />
-          <p className="font-medium text-gray-900">Analytics</p>
-          <p className="text-sm text-gray-600">View detailed reports</p>
+          <p className="font-medium text-gray-900">{t('admin.dashboard.quickActions.analytics')}</p>
+          <p className="text-sm text-gray-600">{t('admin.dashboard.quickActions.analyticsDesc')}</p>
         </button>
       </div>
     </div>

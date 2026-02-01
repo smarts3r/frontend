@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Plus,
   Search,
@@ -23,6 +24,7 @@ type SortField = 'name' | 'productCount' | 'created_at';
 type SortDirection = 'asc' | 'desc';
 
 export default function AdminCategoriesPage() {
+  const { t } = useTranslation();
   const { data: categoriesData, loading: loadingCategories, error: errorCategories, execute: executeGet } = useGet<Category[]>();
   const { loading: creating, execute: executeCreate } = usePost<Category>();
   const { loading: updating, execute: executeUpdate } = usePut<Category>();
@@ -128,20 +130,20 @@ export default function AdminCategoriesPage() {
     if (editingCategory) {
       const result = await executeUpdate(`/api/categories/${editingCategory.id}`, payload);
       if (result) {
-        toast.success('Category updated successfully');
+        toast.success(t('admin.categories.success.updated'));
         fetchCategories();
         closeModal();
       } else {
-        toast.error('Failed to update category');
+        toast.error(t('admin.categories.errors.updateFailed'));
       }
     } else {
       const result = await executeCreate('/api/categories', payload);
       if (result) {
-        toast.success('Category created successfully');
+        toast.success(t('admin.categories.success.created'));
         fetchCategories();
         closeModal();
       } else {
-        toast.error('Failed to create category');
+        toast.error(t('admin.categories.errors.createFailed'));
       }
     }
   };
@@ -161,11 +163,11 @@ export default function AdminCategoriesPage() {
 
     const result = await executeDelete(`/api/categories/${categoryToDelete.id}`);
     if (result !== null) {
-      toast.success('Category deleted successfully');
+      toast.success(t('admin.categories.success.deleted'));
       fetchCategories();
       closeDeleteModal();
     } else {
-      toast.error('Failed to delete category');
+      toast.error(t('admin.categories.errors.deleteFailed'));
     }
   };
 
@@ -195,12 +197,12 @@ export default function AdminCategoriesPage() {
   if (errorCategories && categories.length === 0) {
     return (
       <div className="text-center py-12">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Unable to load categories</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('admin.categories.errors.unableToLoad')}</h1>
         <button 
           onClick={fetchCategories}
           className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
         >
-          Try Again
+          {t('admin.categories.errors.tryAgain')}
         </button>
       </div>
     );
@@ -210,12 +212,12 @@ export default function AdminCategoriesPage() {
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Categories</h1>
-          <p className="text-gray-600">Manage product categories</p>
+          <h1 className="text-3xl font-bold text-gray-900">{t('admin.categories.title')}</h1>
+          <p className="text-gray-600">{t('admin.categories.subtitle')}</p>
         </div>
         <Button className="bg-gray-900 hover:bg-gray-800 text-white" onClick={openAddModal}>
           <Plus className="w-4 h-4 mr-2" />
-          Add Category
+          {t('admin.categories.addCategory')}
         </Button>
       </div>
 
@@ -225,7 +227,7 @@ export default function AdminCategoriesPage() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
-              placeholder="Search categories..."
+              placeholder={t('admin.categories.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
@@ -245,29 +247,29 @@ export default function AdminCategoriesPage() {
                 >
                   <div className="flex items-center gap-1">
                     <Folder className="w-4 h-4" />
-                    Name
+                    {t('admin.categories.table.name')}
                     <SortIcon field="name" />
                   </div>
                 </th>
-                <th className="px-4 py-3 text-sm font-medium text-gray-700">Description</th>
+                <th className="px-4 py-3 text-sm font-medium text-gray-700">{t('admin.categories.table.description')}</th>
                 <th
                   className="px-4 py-3 text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-100"
                   onClick={() => handleSort('productCount')}
                 >
                   <div className="flex items-center gap-1">
                     <Package className="w-4 h-4" />
-                    Products
+                    {t('admin.categories.table.products')}
                     <SortIcon field="productCount" />
                   </div>
                 </th>
-                <th className="px-4 py-3 text-sm font-medium text-gray-700">Actions</th>
+                <th className="px-4 py-3 text-sm font-medium text-gray-700">{t('admin.categories.table.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {paginatedCategories.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
-                    No categories found
+                    {t('admin.categories.empty')}
                   </td>
                 </tr>
               ) : (
@@ -323,7 +325,11 @@ export default function AdminCategoriesPage() {
         {totalPages > 1 && (
           <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredAndSortedCategories.length)} of {filteredAndSortedCategories.length} categories
+              {t('admin.categories.pagination.showing', { 
+                from: ((currentPage - 1) * itemsPerPage) + 1, 
+                to: Math.min(currentPage * itemsPerPage, filteredAndSortedCategories.length), 
+                total: filteredAndSortedCategories.length 
+              })}
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -369,7 +375,7 @@ export default function AdminCategoriesPage() {
                 <div className="p-2 bg-red-100 rounded-lg">
                   <AlertTriangle className="w-5 h-5 text-red-600" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-900">Delete Category</h2>
+                <h2 className="text-xl font-semibold text-gray-900">{t('admin.categories.deleteModal.title')}</h2>
               </div>
             </div>
             
@@ -390,7 +396,7 @@ export default function AdminCategoriesPage() {
                   <div>
                     <p className="font-medium text-gray-900">{categoryToDelete.name}</p>
                     <p className="text-sm text-gray-500">
-                      {categoryToDelete.productCount || 0} products
+                      {t('admin.categories.deleteModal.productsCount', { count: categoryToDelete.productCount || 0 })}
                     </p>
                   </div>
                 </div>
@@ -399,11 +405,11 @@ export default function AdminCategoriesPage() {
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-amber-800">Warning</p>
+                  <p className="text-sm font-medium text-amber-800">{t('admin.categories.deleteModal.warning')}</p>
                   <p className="text-sm text-amber-700 mt-1">
                     {categoryToDelete?.productCount && categoryToDelete.productCount > 0 
-                      ? `This category has ${categoryToDelete.productCount} product${categoryToDelete.productCount > 1 ? 's' : ''}. Deleting it will make these products uncategorized.`
-                      : 'This action cannot be undone. The category will be permanently removed.'
+                      ? t('admin.categories.deleteModal.productsWarning', { count: categoryToDelete.productCount })
+                      : t('admin.categories.deleteModal.cannotUndo')
                     }
                   </p>
                 </div>
@@ -416,7 +422,7 @@ export default function AdminCategoriesPage() {
                 disabled={deleting}
                 className="px-4 py-2 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-colors disabled:opacity-50"
               >
-                Cancel
+                {t('admin.categories.deleteModal.cancel')}
               </button>
               <button
                 onClick={handleDelete}
@@ -426,10 +432,10 @@ export default function AdminCategoriesPage() {
                 {deleting ? (
                   <>
                     <span className="animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
-                    Deleting...
+                    {t('admin.categories.deleteModal.deleting')}
                   </>
                 ) : (
-                  'Delete Category'
+                  t('admin.categories.deleteModal.delete')
                 )}
               </button>
             </div>
