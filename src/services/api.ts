@@ -25,18 +25,72 @@ api.interceptors.request.use(
     },
 );
 
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+const subscribeTokenRefresh = (callback: (token: string) => void) => {
+    refreshSubscribers.push(callback);
+};
+
+const onTokenRefreshed = (token: string) => {
+    refreshSubscribers.forEach((callback) => callback(token));
+    refreshSubscribers = [];
+};
+
+const refreshAccessToken = async () => {
+    const refreshToken = useAuthStore.getState().refreshToken;
+    if (!refreshToken) {
+        throw new Error("No refresh token available");
+    }
+
+    const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+        refreshToken,
+    });
+
+    const { accessToken, refreshToken: newRefreshToken } = response.data;
+    
+    useAuthStore.setState({
+        accessToken,
+        refreshToken: newRefreshToken,
+    });
+
+    return accessToken;
+};
 
 api.interceptors.response.use(
     (response) => response,
-    (error) => {
-        if (error.response?.status === 401) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("refreshToken");
+    async (error) => {
+        const originalRequest = error.config;
 
-            if (window.location.pathname !== "/login") {
-                window.location.href = "/login";
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            if (isRefreshing) {
+                return new Promise((resolve) => {
+                    subscribeTokenRefresh((token) => {
+                        originalRequest.headers.Authorization = `Bearer ${token}`;
+                        resolve(api(originalRequest));
+                    });
+                });
+            }
+
+            originalRequest._retry = true;
+            isRefreshing = true;
+
+            try {
+                const newToken = await refreshAccessToken();
+                onTokenRefreshed(newToken);
+                originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                return api(originalRequest);
+            } catch (refreshError) {
+                useAuthStore.getState().logout();
+                if (window.location.pathname !== "/login") {
+                    window.location.href = "/login";
+                }
+                return Promise.reject(refreshError);
+            } finally {
+                isRefreshing = false;
             }
         }
+
         return Promise.reject(error);
     },
 );

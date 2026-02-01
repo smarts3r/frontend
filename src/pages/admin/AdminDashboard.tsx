@@ -158,6 +158,7 @@ export default function AdminDashboard() {
     return (
       <div className="text-center py-12">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Unable to load dashboard</h1>
+        <p className="text-red-600 mb-4">{error.message || 'Unknown error occurred'}</p>
         <button 
           onClick={handleRefresh}
           className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
