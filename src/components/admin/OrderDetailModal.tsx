@@ -9,10 +9,8 @@ import {
   Printer,
   Mail,
   Check,
-  ChevronRight,
   AlertCircle,
-  Loader2,
-  ExternalLink
+  Loader2
 } from 'lucide-react';
 import { useCurrencyFormat } from '@/lib/currency';
 import type { AdminOrder } from '@/types';
@@ -25,6 +23,14 @@ interface OrderDetailModalProps {
   isLoading?: boolean;
 }
 
+interface ExtendedAdminOrder extends AdminOrder {
+  paymentMethod?: string;
+  paymentStatus?: string;
+  subtotal?: number;
+  shipping?: number;
+  tax?: number;
+}
+
 const STATUS_STEPS = [
   { key: 'pending', label: 'Placed', color: 'yellow' },
   { key: 'confirmed', label: 'Confirmed', color: 'blue' },
@@ -32,8 +38,6 @@ const STATUS_STEPS = [
   { key: 'shipped', label: 'Shipped', color: 'purple' },
   { key: 'delivered', label: 'Delivered', color: 'green' }
 ] as const;
-
-type OrderStatus = typeof STATUS_STEPS[number]['key'] | 'cancelled';
 
 export default function OrderDetailModal({
   isOpen,
@@ -46,6 +50,8 @@ export default function OrderDetailModal({
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
   const [confirmStatus, setConfirmStatus] = useState<string | null>(null);
+
+  const extendedOrder = order as ExtendedAdminOrder | null;
 
   useEffect(() => {
     if (isOpen) {
@@ -106,37 +112,37 @@ export default function OrderDetailModal({
   }, []);
 
   const handleEmailCustomer = useCallback(() => {
-    if (!order?.customerEmail) return;
+    if (!extendedOrder?.customerEmail) return;
 
-    const subject = encodeURIComponent(`Order #${order.id} - Smart S3r`);
+    const subject = encodeURIComponent(`Order #${extendedOrder.id} - Smart S3r`);
     const body = encodeURIComponent(
-      `Dear ${order.customerName || 'Customer'},\n\n` +
-      `Thank you for your order #${order.id}.\n\n` +
-      `Order Total: ${formatCurrency(order.total || 0)}\n` +
-      `Status: ${order.status || 'Pending'}\n\n` +
+      `Dear ${extendedOrder.customerName || 'Customer'},\n\n` +
+      `Thank you for your order #${extendedOrder.id}.\n\n` +
+      `Order Total: ${formatCurrency(extendedOrder.total || 0)}\n` +
+      `Status: ${extendedOrder.status || 'Pending'}\n\n` +
       `You can track your order status in your account.\n\n` +
       `Best regards,\nSmart S3r Team`
     );
 
-    window.open(`mailto:${order.customerEmail}?subject=${subject}&body=${body}`, '_blank');
-  }, [order, formatCurrency]);
+    window.open(`mailto:${extendedOrder.customerEmail}?subject=${subject}&body=${body}`, '_blank');
+  }, [extendedOrder, formatCurrency]);
 
   const handleStatusClick = (status: string) => {
-    if (!order) return;
+    if (!extendedOrder) return;
 
-    const currentStatusIndex = STATUS_STEPS.findIndex(s => s.key === order.status);
+    const currentStatusIndex = STATUS_STEPS.findIndex(s => s.key === extendedOrder.status);
     const newStatusIndex = STATUS_STEPS.findIndex(s => s.key === status);
 
     if (newStatusIndex < currentStatusIndex) {
       setConfirmStatus(status);
     } else {
-      onStatusUpdate(order.id.toString(), status);
+      onStatusUpdate(extendedOrder.id.toString(), status);
     }
   };
 
   const confirmStatusUpdate = () => {
-    if (confirmStatus && order) {
-      onStatusUpdate(order.id.toString(), confirmStatus);
+    if (confirmStatus && extendedOrder) {
+      onStatusUpdate(extendedOrder.id.toString(), confirmStatus);
       setConfirmStatus(null);
     }
   };
@@ -152,22 +158,10 @@ export default function OrderDetailModal({
     });
   };
 
-  const getStatusColor = (status?: string) => {
-    switch (status) {
-      case 'pending': return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'confirmed': return 'text-blue-600 bg-blue-50 border-blue-200';
-      case 'processing': return 'text-indigo-600 bg-indigo-50 border-indigo-200';
-      case 'shipped': return 'text-purple-600 bg-purple-50 border-purple-200';
-      case 'delivered': return 'text-green-600 bg-green-50 border-green-200';
-      case 'cancelled': return 'text-red-600 bg-red-50 border-red-200';
-      default: return 'text-gray-600 bg-gray-50 border-gray-200';
-    }
-  };
-
   const getStepStatus = (stepKey: string) => {
-    if (!order?.status || order.status === 'cancelled') return 'pending';
+    if (!extendedOrder?.status || extendedOrder.status === 'cancelled') return 'pending';
 
-    const currentIndex = STATUS_STEPS.findIndex(s => s.key === order.status);
+    const currentIndex = STATUS_STEPS.findIndex(s => s.key === extendedOrder.status);
     const stepIndex = STATUS_STEPS.findIndex(s => s.key === stepKey);
 
     if (stepIndex < currentIndex) return 'completed';
@@ -175,7 +169,7 @@ export default function OrderDetailModal({
     return 'pending';
   };
 
-  if (!isOpen || !order) return null;
+  if (!isOpen || !extendedOrder) return null;
 
   return (
     <>
@@ -275,10 +269,10 @@ export default function OrderDetailModal({
                 </div>
                 <div>
                   <h2 id="modal-title" className="text-xl font-semibold text-gray-900">
-                    Order #{order.id}
+                    Order #{extendedOrder.id}
                   </h2>
                   <p className="text-sm text-gray-500">
-                    {formatDate(order.created_at)}
+                    {formatDate(extendedOrder.created_at)}
                   </p>
                 </div>
               </div>
@@ -303,7 +297,7 @@ export default function OrderDetailModal({
           </div>
 
           <div className="p-6 space-y-6 print-body">
-            {order.status === 'cancelled' ? (
+            {extendedOrder.status === 'cancelled' ? (
               <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-red-600" />
@@ -316,7 +310,7 @@ export default function OrderDetailModal({
                 <div className="flex items-center justify-between">
                   {STATUS_STEPS.map((step, index) => {
                     const stepStatus = getStepStatus(step.key);
-                    const isClickable = !isLoading && order.status !== 'cancelled';
+                    const isClickable = !isLoading && extendedOrder.status !== 'cancelled';
 
                     return (
                       <div key={step.key} className="flex items-center flex-1 last:flex-none">
@@ -380,9 +374,9 @@ export default function OrderDetailModal({
                   </div>
                   <div className="space-y-1">
                     <p className="text-base font-medium text-gray-900">
-                      {order.customerName || `User #${order.user_id}`}
+                      {extendedOrder.customerName || `User #${extendedOrder.user_id}`}
                     </p>
-                    <p className="text-sm text-gray-600">{order.customerEmail}</p>
+                    <p className="text-sm text-gray-600">{extendedOrder.customerEmail}</p>
                   </div>
                 </div>
 
@@ -406,22 +400,22 @@ export default function OrderDetailModal({
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Order Date:</span>
-                      <span className="font-medium text-gray-900">{formatDate(order.created_at)}</span>
+                      <span className="font-medium text-gray-900">{formatDate(extendedOrder.created_at)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Payment Method:</span>
                       <span className="font-medium text-gray-900">
-                        {(order as Record<string, unknown>).paymentMethod || 'Not specified'}
+                        {extendedOrder.paymentMethod || 'Not specified'}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Payment Status:</span>
                       <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                        ((order as Record<string, unknown>).paymentStatus === 'paid')
+                        (extendedOrder.paymentStatus === 'paid')
                           ? 'bg-green-100 text-green-800'
                           : 'bg-yellow-100 text-yellow-800'
                       }`}>
-                        {(order as Record<string, unknown>).paymentStatus || 'Pending'}
+                        {extendedOrder.paymentStatus || 'Pending'}
                       </span>
                     </div>
                   </div>
@@ -436,26 +430,26 @@ export default function OrderDetailModal({
                     <div className="flex justify-between">
                       <span className="text-gray-600">Subtotal:</span>
                       <span className="font-medium text-gray-900">
-                        {formatCurrency((order as Record<string, unknown>).subtotal || order.total || 0)}
+                        {formatCurrency(extendedOrder.subtotal || extendedOrder.total || 0)}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Shipping:</span>
                       <span className="font-medium text-gray-900">
-                        {formatCurrency((order as Record<string, unknown>).shipping || 0)}
+                        {formatCurrency(extendedOrder.shipping || 0)}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Tax:</span>
                       <span className="font-medium text-gray-900">
-                        {formatCurrency((order as Record<string, unknown>).tax || 0)}
+                        {formatCurrency(extendedOrder.tax || 0)}
                       </span>
                     </div>
                     <div className="border-t border-gray-200 pt-2 mt-2">
                       <div className="flex justify-between">
                         <span className="text-base font-semibold text-gray-900">Total:</span>
                         <span className="text-lg font-bold text-gray-900">
-                          {formatCurrency(order.total || 0)}
+                          {formatCurrency(extendedOrder.total || 0)}
                         </span>
                       </div>
                     </div>
@@ -472,7 +466,7 @@ export default function OrderDetailModal({
                   </button>
                   <button
                     onClick={handleEmailCustomer}
-                    disabled={!order.customerEmail}
+                    disabled={!extendedOrder.customerEmail}
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Mail className="w-4 h-4" />
@@ -487,12 +481,12 @@ export default function OrderDetailModal({
                 <Package className="w-4 h-4 text-gray-500" />
                 <h3 className="text-sm font-medium text-gray-700">Order Items</h3>
                 <span className="text-xs text-gray-500">
-                  ({order.orderItems?.length || 0} items)
+                  ({extendedOrder.orderItems?.length || 0} items)
                 </span>
               </div>
               <div className="space-y-3">
-                {order.orderItems && order.orderItems.length > 0 ? (
-                  order.orderItems.map((item, index) => (
+                {extendedOrder.orderItems && extendedOrder.orderItems.length > 0 ? (
+                  extendedOrder.orderItems.map((item, index) => (
                     <div
                       key={index}
                       className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg"
@@ -542,7 +536,7 @@ export default function OrderDetailModal({
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600">Status:</span>
               <select
-                value={order.status || 'pending'}
+                value={extendedOrder.status || 'pending'}
                 onChange={(e) => handleStatusClick(e.target.value)}
                 disabled={isLoading}
                 className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:opacity-50"
@@ -573,19 +567,19 @@ export default function OrderDetailModal({
           </div>
 
           <div className="border-b border-gray-200 pb-4 mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Order #{order.id}</h2>
-            <p className="text-gray-600">{formatDate(order.created_at)}</p>
+            <h2 className="text-xl font-bold text-gray-900">Order #{extendedOrder.id}</h2>
+            <p className="text-gray-600">{formatDate(extendedOrder.created_at)}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-8 mb-6">
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Customer</h3>
-              <p className="text-gray-700">{order.customerName || `User #${order.user_id}`}</p>
-              <p className="text-gray-700">{order.customerEmail}</p>
+              <p className="text-gray-700">{extendedOrder.customerName || `User #${extendedOrder.user_id}`}</p>
+              <p className="text-gray-700">{extendedOrder.customerEmail}</p>
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 mb-2">Order Status</h3>
-              <p className="text-gray-700 capitalize">{order.status || 'Pending'}</p>
+              <p className="text-gray-700 capitalize">{extendedOrder.status || 'Pending'}</p>
             </div>
           </div>
 
@@ -601,7 +595,7 @@ export default function OrderDetailModal({
                 </tr>
               </thead>
               <tbody>
-                {order.orderItems?.map((item, index) => (
+                {extendedOrder.orderItems?.map((item, index) => (
                   <tr key={index} className="border-b border-gray-100">
                     <td className="py-2 text-gray-700">{item.product?.name || `Product #${item.product_id}`}</td>
                     <td className="py-2 text-center text-gray-700">{item.quantity}</td>
@@ -616,19 +610,19 @@ export default function OrderDetailModal({
           <div className="border-t border-gray-200 pt-4">
             <div className="flex justify-between mb-2">
               <span className="text-gray-600">Subtotal:</span>
-              <span className="font-medium text-gray-900">{formatCurrency((order as Record<string, unknown>).subtotal || order.total || 0)}</span>
+              <span className="font-medium text-gray-900">{formatCurrency(extendedOrder.subtotal || extendedOrder.total || 0)}</span>
             </div>
             <div className="flex justify-between mb-2">
               <span className="text-gray-600">Shipping:</span>
-              <span className="font-medium text-gray-900">{formatCurrency((order as Record<string, unknown>).shipping || 0)}</span>
+              <span className="font-medium text-gray-900">{formatCurrency(extendedOrder.shipping || 0)}</span>
             </div>
             <div className="flex justify-between mb-2">
               <span className="text-gray-600">Tax:</span>
-              <span className="font-medium text-gray-900">{formatCurrency((order as Record<string, unknown>).tax || 0)}</span>
+              <span className="font-medium text-gray-900">{formatCurrency(extendedOrder.tax || 0)}</span>
             </div>
             <div className="flex justify-between text-lg font-bold text-gray-900">
               <span>Total:</span>
-              <span>{formatCurrency(order.total || 0)}</span>
+              <span>{formatCurrency(extendedOrder.total || 0)}</span>
             </div>
           </div>
 

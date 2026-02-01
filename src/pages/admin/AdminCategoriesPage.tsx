@@ -213,7 +213,7 @@ export default function AdminCategoriesPage() {
           <h1 className="text-3xl font-bold text-gray-900">Categories</h1>
           <p className="text-gray-600">Manage product categories</p>
         </div>
-        <Button color="gray" onClick={openAddModal}>
+        <Button className="bg-gray-900 hover:bg-gray-800 text-white" onClick={openAddModal}>
           <Plus className="w-4 h-4 mr-2" />
           Add Category
         </Button>

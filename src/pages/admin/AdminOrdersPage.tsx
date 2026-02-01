@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Search,
   Download,
@@ -11,22 +10,39 @@ import {
   Edit,
   Check,
   MoreHorizontal,
-  ArrowUpDown
+  ArrowUpDown,
+  Printer,
+  FileSpreadsheet,
+  Package,
+  Clock,
+  RotateCcw,
+  CheckCircle,
+  Calendar,
+  X
 } from 'lucide-react';
 import { Card, Button, Dropdown, DropdownItem, DropdownDivider } from 'flowbite-react';
 import { useGetAdminOrders, useUpdateAdminOrder, useBulkUpdateOrderStatus, useExportOrders } from '@/hooks/useAdmin';
 import { useAdminSocket } from '@/hooks/useAdminSocket';
 import { useCurrencyFormat } from '@/lib/currency';
 import { toast } from 'sonner';
+import OrderDetailModal from '@/components/admin/OrderDetailModal';
 import type { AdminOrder } from '@/types';
 
 type SortField = 'id' | 'customerName' | 'total' | 'status' | 'created_at';
 type SortDirection = 'asc' | 'desc';
 
+interface OrderStats {
+  todayOrders: number;
+  pendingOrders: number;
+  processingOrders: number;
+  completedToday: number;
+  todayGrowth: number;
+  completedGrowth: number;
+}
+
 export default function AdminOrdersPage() {
-  const navigate = useNavigate();
   const formatCurrency = useCurrencyFormat();
-  const { data: ordersData, loading, error, getAdminOrders } = useGetAdminOrders();
+  const { data: ordersData, loading, getAdminOrders } = useGetAdminOrders();
   const { updateAdminOrder } = useUpdateAdminOrder();
   const { bulkUpdateOrderStatus } = useBulkUpdateOrderStatus();
   const { exportOrders } = useExportOrders();
@@ -35,6 +51,8 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [dateFrom, setDateFrom] = useState<string>('');
+  const [dateTo, setDateTo] = useState<string>('');
   const [selectedOrders, setSelectedOrders] = useState<Set<number>>(new Set());
   const [sortConfig, setSortConfig] = useState<{ field: SortField; direction: SortDirection }>({
     field: 'created_at',
@@ -44,8 +62,13 @@ export default function AdminOrdersPage() {
   const [itemsPerPage] = useState(10);
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
+  const [selectedOrder, setSelectedOrder] = useState<AdminOrder | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isModalLoading, setIsModalLoading] = useState(false);
+
   useEffect(() => {
     getAdminOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -60,7 +83,7 @@ export default function AdminOrdersPage() {
       setOrders(prev => [newOrders[0], ...prev]);
       clearNewOrders();
     }
-  }, [newOrders]);
+  }, [newOrders, clearNewOrders]);
 
   useEffect(() => {
     if (updatedOrders.length > 0) {
@@ -72,7 +95,54 @@ export default function AdminOrdersPage() {
       ));
       clearUpdatedOrders();
     }
-  }, [updatedOrders]);
+  }, [updatedOrders, clearUpdatedOrders]);
+
+  const stats: OrderStats = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const todayOrders = orders.filter(o => {
+      const orderDate = new Date(o.created_at || '');
+      orderDate.setHours(0, 0, 0, 0);
+      return orderDate.getTime() === today.getTime();
+    }).length;
+
+    const yesterdayOrders = orders.filter(o => {
+      const orderDate = new Date(o.created_at || '');
+      orderDate.setHours(0, 0, 0, 0);
+      return orderDate.getTime() === yesterday.getTime();
+    }).length;
+
+    const pendingOrders = orders.filter(o => o.status === 'pending').length;
+    const processingOrders = orders.filter(o => o.status === 'processing').length;
+
+    const completedToday = orders.filter(o => {
+      const orderDate = new Date(o.created_at || '');
+      orderDate.setHours(0, 0, 0, 0);
+      return orderDate.getTime() === today.getTime() && o.status === 'delivered';
+    }).length;
+
+    const completedYesterday = orders.filter(o => {
+      const orderDate = new Date(o.created_at || '');
+      orderDate.setHours(0, 0, 0, 0);
+      return orderDate.getTime() === yesterday.getTime() && o.status === 'delivered';
+    }).length;
+
+    const todayGrowth = yesterdayOrders === 0 ? 100 : Math.round(((todayOrders - yesterdayOrders) / yesterdayOrders) * 100);
+    const completedGrowth = completedYesterday === 0 ? 100 : Math.round(((completedToday - completedYesterday) / completedYesterday) * 100);
+
+    return {
+      todayOrders,
+      pendingOrders,
+      processingOrders,
+      completedToday,
+      todayGrowth,
+      completedGrowth
+    };
+  }, [orders]);
 
   const handleSort = (field: SortField) => {
     setSortConfig(prev => ({
@@ -97,23 +167,43 @@ export default function AdminOrdersPage() {
       result = result.filter(order => order.status === statusFilter);
     }
 
+    if (dateFrom) {
+      const fromDate = new Date(dateFrom);
+      fromDate.setHours(0, 0, 0, 0);
+      result = result.filter(order => {
+        const orderDate = new Date(order.created_at || '');
+        return orderDate >= fromDate;
+      });
+    }
+
+    if (dateTo) {
+      const toDate = new Date(dateTo);
+      toDate.setHours(23, 59, 59, 999);
+      result = result.filter(order => {
+        const orderDate = new Date(order.created_at || '');
+        return orderDate <= toDate;
+      });
+    }
+
     result.sort((a, b) => {
-      let aValue: any = a[sortConfig.field];
-      let bValue: any = b[sortConfig.field];
+      let aValue: string | number = '';
+      let bValue: string | number = '';
 
       if (sortConfig.field === 'customerName') {
         aValue = a.customerName || `User #${a.user_id}`;
         bValue = b.customerName || `User #${b.user_id}`;
-      }
-
-      if (sortConfig.field === 'total') {
+      } else if (sortConfig.field === 'total') {
         aValue = a.total || 0;
         bValue = b.total || 0;
-      }
-
-      if (sortConfig.field === 'created_at') {
+      } else if (sortConfig.field === 'created_at') {
         aValue = new Date(a.created_at || '').getTime();
         bValue = new Date(b.created_at || '').getTime();
+      } else if (sortConfig.field === 'id') {
+        aValue = a.id;
+        bValue = b.id;
+      } else if (sortConfig.field === 'status') {
+        aValue = a.status || '';
+        bValue = b.status || '';
       }
 
       if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
@@ -122,7 +212,7 @@ export default function AdminOrdersPage() {
     });
 
     return result;
-  }, [orders, searchTerm, statusFilter, sortConfig]);
+  }, [orders, searchTerm, statusFilter, dateFrom, dateTo, sortConfig]);
 
   const totalPages = Math.ceil(filteredAndSortedOrders.length / itemsPerPage);
   const paginatedOrders = filteredAndSortedOrders.slice(
@@ -148,12 +238,39 @@ export default function AdminOrdersPage() {
     setSelectedOrders(newSelected);
   };
 
-  const handleStatusUpdate = async (orderId: string, status: AdminOrder['status']) => {
+  const openOrderDetail = (order: AdminOrder) => {
+    setSelectedOrder(order);
+    setIsDetailModalOpen(true);
+  };
+
+  const closeOrderDetail = () => {
+    setIsDetailModalOpen(false);
+    setSelectedOrder(null);
+  };
+
+  const handleStatusUpdateFromModal = async (orderId: string, status: string) => {
+    setIsModalLoading(true);
     try {
-      await updateAdminOrder(orderId, { status });
+      await updateAdminOrder(orderId, { status: status as AdminOrder['status'] });
+      toast.success(`Order #${orderId} updated to ${status}`);
+      setOrders(prev => prev.map(order =>
+        order.id.toString() === orderId
+          ? { ...order, status: status as AdminOrder['status'] }
+          : order
+      ));
+    } catch {
+      toast.error('Failed to update order status');
+    } finally {
+      setIsModalLoading(false);
+    }
+  };
+
+  const handleStatusUpdate = async (orderId: string, status: string) => {
+    try {
+      await updateAdminOrder(orderId, { status: status as AdminOrder['status'] });
       toast.success(`Order #${orderId} updated to ${status}`);
       getAdminOrders();
-    } catch (err) {
+    } catch {
       toast.error('Failed to update order status');
     }
   };
@@ -165,12 +282,12 @@ export default function AdminOrdersPage() {
     try {
       await bulkUpdateOrderStatus({
         orderIds: Array.from(selectedOrders).map(id => id.toString()),
-        status: status as any
+        status: status as 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
       });
       toast.success(`Updated ${selectedOrders.size} orders to ${status}`);
       setSelectedOrders(new Set());
       getAdminOrders();
-    } catch (err) {
+    } catch {
       toast.error('Failed to update orders');
     } finally {
       setUpdatingStatus(false);
@@ -181,9 +298,105 @@ export default function AdminOrdersPage() {
     try {
       await exportOrders();
       toast.success('Orders exported successfully');
-    } catch (err) {
+    } catch {
       toast.error('Failed to export orders');
     }
+  };
+
+  const handleExportSelected = () => {
+    if (selectedOrders.size === 0) return;
+
+    const selectedData = orders.filter(o => selectedOrders.has(o.id));
+    const csvContent = convertToCSV(selectedData);
+    downloadCSV(csvContent, `selected-orders-${new Date().toISOString().split('T')[0]}.csv`);
+    toast.success(`Exported ${selectedOrders.size} orders`);
+  };
+
+  const handlePrintSelected = () => {
+    if (selectedOrders.size === 0) return;
+
+    const selectedData = orders.filter(o => selectedOrders.has(o.id));
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(generatePrintHTML(selectedData));
+      printWindow.document.close();
+      printWindow.print();
+    }
+  };
+
+  const convertToCSV = (data: AdminOrder[]) => {
+    const headers = ['Order ID', 'Customer', 'Email', 'Status', 'Total', 'Items', 'Date'];
+    const rows = data.map(order => [
+      order.id,
+      order.customerName || `User #${order.user_id}`,
+      order.customerEmail,
+      order.status || 'pending',
+      order.total || 0,
+      order.orderItems?.length || 0,
+      new Date(order.created_at || '').toLocaleDateString()
+    ]);
+    return [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  };
+
+  const downloadCSV = (content: string, filename: string) => {
+    const blob = new Blob([content], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const generatePrintHTML = (data: AdminOrder[]) => {
+    return `
+      <html>
+        <head>
+          <title>Selected Orders - Smart S3r</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #f3f4f6; }
+            h1 { text-align: center; }
+            .header { margin-bottom: 30px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>Smart S3r - Selected Orders</h1>
+            <p>Generated: ${new Date().toLocaleString()}</p>
+            <p>Total Orders: ${data.length}</p>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.map(order => `
+                <tr>
+                  <td>#${order.id}</td>
+                  <td>${order.customerName || `User #${order.user_id}`}</td>
+                  <td>${order.customerEmail}</td>
+                  <td>${order.status || 'pending'}</td>
+                  <td>${formatCurrency(order.total || 0)}</td>
+                  <td>${new Date(order.created_at || '').toLocaleDateString()}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
   };
 
   const getStatusBadgeColor = (status?: string) => {
@@ -204,6 +417,27 @@ export default function AdminOrdersPage() {
       month: 'short',
       day: 'numeric',
     });
+  };
+
+  const setQuickDateRange = (range: 'today' | 'week' | 'month') => {
+    const today = new Date();
+    const fromDate = new Date();
+
+    if (range === 'today') {
+      fromDate.setHours(0, 0, 0, 0);
+    } else if (range === 'week') {
+      fromDate.setDate(today.getDate() - 7);
+    } else if (range === 'month') {
+      fromDate.setMonth(today.getMonth() - 1);
+    }
+
+    setDateFrom(fromDate.toISOString().split('T')[0]);
+    setDateTo(today.toISOString().split('T')[0]);
+  };
+
+  const clearDateFilters = () => {
+    setDateFrom('');
+    setDateTo('');
   };
 
   const SortIcon = ({ field }: { field: SortField }) => {
@@ -243,49 +477,166 @@ export default function AdminOrdersPage() {
           </div>
           <Button color="gray" onClick={handleExport}>
             <Download className="w-4 h-4 mr-2" />
-            Export
+            Export All
           </Button>
         </div>
       </div>
 
-      <Card className="mb-6">
-        <div className="p-4 flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search orders..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
-            />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Card className="bg-white">
+          <div className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Calendar className="w-5 h-5 text-blue-600" />
+              </div>
+              {stats.todayGrowth !== 0 && (
+                <span className={`text-xs font-medium ${stats.todayGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {stats.todayGrowth > 0 ? '↑' : '↓'} {Math.abs(stats.todayGrowth)}% vs yest
+                </span>
+              )}
+            </div>
+            <p className="text-2xl font-bold text-gray-900 mt-2">{stats.todayOrders}</p>
+            <p className="text-sm text-gray-600">Today&apos;s Orders</p>
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
-          >
-            <option value="all">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="processing">Processing</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+        </Card>
+
+        <Card className="bg-white">
+          <div className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <Clock className="w-5 h-5 text-yellow-600" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-gray-900 mt-2">{stats.pendingOrders}</p>
+            <p className="text-sm text-gray-600">Pending</p>
+          </div>
+        </Card>
+
+        <Card className="bg-white">
+          <div className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="p-2 bg-indigo-100 rounded-lg">
+                <RotateCcw className="w-5 h-5 text-indigo-600" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-gray-900 mt-2">{stats.processingOrders}</p>
+            <p className="text-sm text-gray-600">Processing</p>
+          </div>
+        </Card>
+
+        <Card className="bg-white">
+          <div className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <CheckCircle className="w-5 h-5 text-green-600" />
+              </div>
+              {stats.completedGrowth !== 0 && (
+                <span className={`text-xs font-medium ${stats.completedGrowth > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {stats.completedGrowth > 0 ? '↑' : '↓'} {Math.abs(stats.completedGrowth)}% vs yest
+                </span>
+              )}
+            </div>
+            <p className="text-2xl font-bold text-gray-900 mt-2">{stats.completedToday}</p>
+            <p className="text-sm text-gray-600">Completed Today</p>
+          </div>
+        </Card>
+      </div>
+
+      <Card className="mb-6">
+        <div className="p-4 space-y-4">
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search orders..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+              />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+            >
+              <option value="all">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="processing">Processing</option>
+              <option value="shipped">Shipped</option>
+              <option value="delivered">Delivered</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 text-sm"
+                placeholder="From"
+              />
+              <span className="text-gray-400">-</span>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 text-sm"
+                placeholder="To"
+              />
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-gray-500">Quick filters:</span>
+            <button
+              onClick={() => setQuickDateRange('today')}
+              className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              Today
+            </button>
+            <button
+              onClick={() => setQuickDateRange('week')}
+              className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              Last 7 Days
+            </button>
+            <button
+              onClick={() => setQuickDateRange('month')}
+              className="px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              This Month
+            </button>
+            {(dateFrom || dateTo) && (
+              <button
+                onClick={clearDateFilters}
+                className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1"
+              >
+                <X className="w-3 h-3" />
+                Clear dates
+              </button>
+            )}
+          </div>
         </div>
       </Card>
 
       {selectedOrders.size > 0 && (
-        <Card className="mb-4 bg-gray-50">
-          <div className="p-4 flex items-center justify-between">
-            <span className="text-sm text-gray-600">{selectedOrders.size} orders selected</span>
-            <div className="flex gap-2">
+        <div className="mb-4 bg-gray-900 text-white rounded-xl shadow-lg transform transition-all animate-fadeIn">
+          <div className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gray-800 rounded-lg">
+                <Package className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="font-semibold">{selectedOrders.size} orders selected</span>
+                <p className="text-sm text-gray-400">Choose an action to apply to all selected orders</p>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
               <select
                 onChange={(e) => e.target.value && handleBulkStatusUpdate(e.target.value)}
                 value=""
                 disabled={updatingStatus}
-                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                className="px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-600 disabled:opacity-50"
               >
                 <option value="">Update Status</option>
                 <option value="pending">Pending</option>
@@ -295,12 +646,31 @@ export default function AdminOrdersPage() {
                 <option value="delivered">Delivered</option>
                 <option value="cancelled">Cancelled</option>
               </select>
-              <Button color="gray" size="sm" onClick={() => setSelectedOrders(new Set())}>
+              <button
+                onClick={handlePrintSelected}
+                disabled={updatingStatus}
+                className="px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50"
+              >
+                <Printer className="w-4 h-4" />
+                Print
+              </button>
+              <button
+                onClick={handleExportSelected}
+                disabled={updatingStatus}
+                className="px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-sm flex items-center gap-2 transition-colors disabled:opacity-50"
+              >
+                <FileSpreadsheet className="w-4 h-4" />
+                Export
+              </button>
+              <button
+                onClick={() => setSelectedOrders(new Set())}
+                className="px-3 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-sm transition-colors"
+              >
                 Clear
-              </Button>
+              </button>
             </div>
           </div>
-        </Card>
+        </div>
       )}
 
       <Card>
@@ -409,8 +779,9 @@ export default function AdminOrdersPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => navigate(`/admin/orders/${order.id}`)}
+                          onClick={() => openOrderDetail(order)}
                           className="p-1 hover:bg-gray-100 rounded"
+                          title="View Order Details"
                         >
                           <Eye className="w-4 h-4 text-gray-600" />
                         </button>
@@ -474,6 +845,14 @@ export default function AdminOrdersPage() {
           </div>
         </div>
       </Card>
+
+      <OrderDetailModal
+        isOpen={isDetailModalOpen}
+        order={selectedOrder}
+        onClose={closeOrderDetail}
+        onStatusUpdate={handleStatusUpdateFromModal}
+        isLoading={isModalLoading}
+      />
     </div>
   );
 }

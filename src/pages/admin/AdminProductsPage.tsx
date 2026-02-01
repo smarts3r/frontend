@@ -451,7 +451,7 @@ export default function AdminProductsPage() {
               <FileSpreadsheet className="w-4 h-4 mr-2" /> Download Template
             </DropdownItem>
           </Dropdown>
-          <Button color="gray" onClick={openAddModal}>
+          <Button className="bg-gray-900 hover:bg-gray-800 text-white" onClick={openAddModal}>
             <Plus className="w-4 h-4 mr-2" />
             Add Product
           </Button>
