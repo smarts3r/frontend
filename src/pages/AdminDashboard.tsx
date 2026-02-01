@@ -19,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthStore } from "@/store/authStore";
 import type { Order, Product, User as UserType } from "@/types/";
-import { useCurrencyFormat } from "@/lib/currency"; // Import useCurrencyFormat
+import { useCurrencyFormat } from "@/lib/currency";
 
 interface DashboardStats {
   totalRevenue: number;
@@ -46,19 +46,12 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     console.log("AdminDashboard: useEffect start", user);
-    // Check if user is admin
-    // if (user.role.toUpperCase() !== "ADMIN") {
-    //   console.log("AdminDashboard: user not admin, redirecting");
-    //   navigate("/");
-    //   return;
-    // }
     console.log("AdminDashboard: user is admin");
 
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
 
-        // Mock dashboard data - replace with actual API calls
         const mockStats: DashboardStats = {
           totalRevenue: 45678.9,
           totalOrders: 234,
@@ -93,14 +86,20 @@ export default function AdminDashboard() {
             name: "Premium Wireless Headphones",
             price: 299.99,
             category: "Electronics",
+            category_id: 1,
             img: "/api/placeholder/300/300",
+            stock: 50,
+            status: 'active',
           },
           {
             id: 2,
             name: "Smart Watch Pro",
             price: 449.99,
             category: "Electronics",
+            category_id: 1,
             img: "/api/placeholder/300/300",
+            stock: 30,
+            status: 'active',
           },
         ];
 
@@ -257,7 +256,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
           title="Total Revenue"
@@ -289,7 +287,6 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* Detailed Tabs */}
       <Tabs defaultValue="orders" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="orders">Recent Orders</TabsTrigger>
@@ -437,7 +434,6 @@ export default function AdminDashboard() {
         </TabsContent>
       </Tabs>
 
-      {/* Quick Actions */}
       <Card className="mt-8">
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>

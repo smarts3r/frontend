@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { ProductCard } from '@/components/common/ProductCard'; // Corrected import path
+import { ProductCard } from '@/components/common/ProductCard';
 import { Button } from '@/components/ui/button';
-import { useCartStore } from '@/store/cartStore'; // Import useCartStore
+import { useCartStore } from '@/store/cartStore';
 import type { Product } from '@/types';
 
-// Mock data if backend connection fails or for initial design
-const MOCK_PRODUCTS = [
+const MOCK_PRODUCTS: Product[] = [
     {
         id: 1,
         name: "Apple Watch Series 7 GPS, Aluminium Case, Starlight Sport",
@@ -13,9 +12,11 @@ const MOCK_PRODUCTS = [
         old_price: 699,
         img: "https://images.unsplash.com/photo-1546868871-7041f2a55e12?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
         category: "Electronics",
+        category_id: 1,
         description: "Latest Apple Watch with health tracking.",
         sku: "AW7-001",
         stock: 10,
+        status: 'active',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
     },
@@ -26,9 +27,11 @@ const MOCK_PRODUCTS = [
         old_price: 1199,
         img: "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
         category: "Electronics",
+        category_id: 1,
         description: "The biggest upgrade to the Pro camera system.",
         sku: "IP13-MAX-002",
         stock: 5,
+        status: 'active',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
     },
@@ -36,12 +39,13 @@ const MOCK_PRODUCTS = [
         id: 3,
         name: "MacBook Pro 14-inch M1 Pro",
         price: 1999,
-        old_price: undefined,
         img: "https://images.unsplash.com/photo-1517336714731-489689fd1ca4?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
         category: "Computers",
+        category_id: 2,
         description: "Supercharged for pros.",
         sku: "MBP14-003",
         stock: 8,
+        status: 'active',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
     },
@@ -52,26 +56,26 @@ const MOCK_PRODUCTS = [
         old_price: 399,
         img: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60",
         category: "Audio",
+        category_id: 3,
         description: "Industry-leading noise cancellation.",
         sku: "SONY-XM4-004",
         stock: 15,
+        status: 'active',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
     }
 ];
 
 export const LandingPage: React.FC = () => {
-    // In a real app, I would fetch from /api/products here
     const [products] = useState(MOCK_PRODUCTS);
-    const addItem = useCartStore((state) => state.addItem); // Get addItem from store
+    const addItem = useCartStore((state) => state.addItem);
 
-    const handleAddToCart = (product: Product) => { // Define handleAddToCart
+    const handleAddToCart = (product: Product) => {
         addItem(product, 1);
     };
 
     return (
         <div className="bg-gray-50 min-h-screen pb-20">
-            {/* Hero Section */}
             <div className="bg-[#1e293b] py-20">
                 <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
                     <div className="md:w-1/2 text-white mb-10 md:mb-0">
@@ -87,9 +91,7 @@ export const LandingPage: React.FC = () => {
                         </Button>
                     </div>
                     <div className="md:w-1/2 flex justify-center">
-                        {/* Placeholder for Hero Image */}
                         <div className="relative w-full max-w-lg aspect-auto">
-                            {/* Decorative elements */}
                             <div className="absolute top-10 right-10 w-20 h-20 bg-blue-500 rounded-full blur-3xl opacity-20"></div>
                             <div className="absolute bottom-10 left-10 w-32 h-32 bg-purple-500 rounded-full blur-3xl opacity-20"></div>
                             <img
@@ -102,17 +104,15 @@ export const LandingPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Features / Benefits (Optional) */}
             <div className="container mx-auto px-4 py-16">
                 <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">New Arrivals</h2>
 
-                {/* Product Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {products.map(product => (
                         <ProductCard
                             key={product.id}
                             product={product}
-                            onAddToCart={() => handleAddToCart(product)} // Pass the product to handleAddToCart
+                            onAddToCart={() => handleAddToCart(product)}
                         />
                     ))}
                 </div>

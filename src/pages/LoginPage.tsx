@@ -11,7 +11,6 @@ import {
   TextInput,
   Label,
   Checkbox,
-  Card,
   Spinner,
 } from "flowbite-react";
 import api from "@/services/api";
@@ -59,7 +58,7 @@ export default function LoginPage() {
       const errorMessage =
         error instanceof Error && "response" in error
           ? (error as { response?: { data?: { message?: string } } })
-              .response?.data?.message
+            .response?.data?.message
           : t("loginPage.loginFailed");
 
       toast.error(errorMessage || t("loginPage.loginFailed"));
@@ -69,115 +68,107 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      className="relative min-h-screen w-full flex items-center justify-center bg-cover bg-center bg-no-repeat"
-      style={{
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=2000&q=80')",
-      }}
-    >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/40" />
+    <div className="flex min-h-screen w-full bg-white">
+      {/* Left Side - Form */}
+      <div className="flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2 lg:px-20 xl:px-24">
+        <div className="mx-auto w-full max-w-sm lg:w-96">
+          <div className="mb-10">
+            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900">
+              Welcome back
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Please enter your details to sign in
+            </p>
+          </div>
 
-      {/* Card Wrapper */}
-      <div className="relative z-10 w-full max-w-md px-4">
-        <Card className="bg-white/90 backdrop-blur-sm shadow-2xl border-0">
-          {/* ✅ Card Padding متظبط هنا */}
-          <div className="p-8 sm:p-10">
-            {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Welcome Back
-              </h1>
-              <p className="text-gray-600">
-                Sign in to your Smart S3r account
-              </p>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div>
+              <Label
+                htmlFor="email"
+                className="mb-2 block text-sm font-medium text-gray-700"
+              >
+                Email address
+              </Label>
+              <TextInput
+                id="email"
+                type="email"
+                placeholder="name@company.com"
+                icon={Mail}
+                color={errors.email ? "failure" : "gray"}
+                {...register("email")}
+                className="[&_input]:h-11"
+              />
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              {/* Email */}
-              <div>
-                <Label htmlFor="email" className="mb-2 block">
-                  Email Address
-                </Label>
-                <TextInput
-                  id="email"
-                  type="email"
-                  placeholder="name@example.com"
-                  icon={Mail}
-                  color={errors.email ? "failure" : "gray"}
-                  {...register("email")}
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Password */}
-              <div>
-                <Label htmlFor="password" className="mb-2 block">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <Label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
                   Password
                 </Label>
-
-                <div className="relative">
-                  <TextInput
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    icon={Lock}
-                    color={errors.password ? "failure" : "gray"}
-                    className="pr-12"
-                    {...register("password")}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="w-5 h-5" />
-                    ) : (
-                      <Eye className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-
-                {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">
-                    {errors.password.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Remember & Forgot */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <Checkbox
-                    id="remember"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                  />
-                  <Label htmlFor="remember" className="ml-2 text-sm">
-                    Remember me
-                  </Label>
-                </div>
-
                 <Link
                   to="/forgot-password"
-                  className="text-sm font-medium text-blue-600 hover:underline"
+                  className="text-sm font-medium text-blue-600 hover:text-blue-500"
                 >
                   Forgot password?
                 </Link>
               </div>
+              <div className="relative">
+                <TextInput
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  icon={Lock}
+                  color={errors.password ? "failure" : "gray"}
+                  {...register("password")}
+                  className="[&_input]:h-11 pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
 
-              {/* Submit */}
+            <div className="flex items-center">
+              <Checkbox
+                id="remember-me"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <Label
+                htmlFor="remember-me"
+                className="ml-2 block text-sm text-gray-900"
+              >
+                Remember me for 30 days
+              </Label>
+            </div>
+
+            <div>
               <Button
                 type="submit"
                 size="lg"
-                className="w-full bg-gray-900 hover:bg-gray-800 text-white border-0"
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white [&>span]:py-3"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -188,24 +179,43 @@ export default function LoginPage() {
                 ) : (
                   <>
                     Sign In
-                    <ArrowRight className="ml-2 w-5 h-5" />
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </>
                 )}
               </Button>
+            </div>
+          </form>
 
-              {/* Register */}
-              <p className="text-center text-sm text-gray-600 pt-4">
-                Don't have an account?{" "}
-                <Link
-                  to="/register"
-                  className="font-semibold text-blue-600 hover:underline"
-                >
-                  Create one
-                </Link>
-              </p>
-            </form>
-          </div>
-        </Card>
+          <p className="mt-8 text-center text-sm text-gray-600">
+            Don't have an account?{" "}
+            <Link
+              to="/register"
+              className="font-semibold text-blue-600 hover:text-blue-500"
+            >
+              Sign up for free
+            </Link>
+          </p>
+        </div>
+      </div>
+
+      {/* Right Side - Image/Visual */}
+      <div className="hidden relative lg:block lg:w-1/2">
+        <div className="absolute inset-0 bg-gray-900">
+          <img
+            className="h-full w-full object-cover opacity-80"
+            src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=2000&q=80"
+            alt="Login background"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 p-20 text-white">
+          <h3 className="text-4xl font-bold mb-4">
+            "The best way to predict the future is to wait for it."
+          </h3>
+          <p className="text-lg text-gray-300">
+            Not really, go create it with Smart S3r.
+          </p>
+        </div>
       </div>
     </div>
   );

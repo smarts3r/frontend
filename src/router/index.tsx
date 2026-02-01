@@ -4,6 +4,8 @@ import AdminLayout from "@/components/admin/AdminLayout";
 import AboutPage from "@/pages/AboutPage";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminOrdersPage from "@/pages/admin/AdminOrdersPage";
+import AdminCategoriesPage from "@/pages/admin/AdminCategoriesPage";
+import AdminProductsPage from "@/pages/admin/AdminProductsPage";
 import AdminDashboardPage from "@/pages/AdminDashboardPage";
 import CartPage from "@/pages/CartPage";
 import CheckoutPage from "@/pages/CheckoutPage";
@@ -94,7 +96,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "products",
-        element: <AdminDashboard />,
+        element: <AdminProductsPage />,
+      },
+      {
+        path: "categories",
+        element: <AdminCategoriesPage />,
       },
       {
         path: "users",

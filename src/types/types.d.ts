@@ -5,9 +5,21 @@ export interface Product {
   price: number;
   old_price?: number;
   category: string;
+  category_id: number;
   sku?: string;
-  stock?: number;
+  stock: number;
   description?: string;
+  status: 'active' | 'inactive';
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Category {
+  id: number;
+  name: string;
+  description?: string;
+  image?: string;
+  productCount?: number;
   created_at?: string;
   updated_at?: string;
 }
@@ -105,6 +117,10 @@ export interface AdminOrder extends Order {
     unit_price: number;
     product?: Product;
   }>;
+}
+
+export interface AdminProduct extends Product {
+  category_name?: string;
 }
 
 export interface ProductCardProps {

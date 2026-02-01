@@ -8,7 +8,8 @@ import {
   X,
   Users,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Folder
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useState } from 'react';
@@ -33,6 +34,7 @@ export default function AdminSidebar({ isOpen, onClose, isConnected }: AdminSide
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
     { path: '/admin/products', icon: Package, label: 'Products' },
+    { path: '/admin/categories', icon: Folder, label: 'Categories' },
     { path: '/admin/users', icon: Users, label: 'Users' },
     { path: '/admin/settings', icon: Settings, label: 'Settings' },
   ];
