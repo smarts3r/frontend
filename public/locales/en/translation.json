@@ -32,10 +32,17 @@
   "sale": "Sale",
   "navbar": {
     "searchPlaceholder": "Search products...",
+    "search_placeholder": "Search for products...",
     "cart": "Cart",
     "signin": "Sign In",
     "home": "Home",
+    "shop": "Shop",
     "shopCategories": "Shop by Categories",
+    "categories": "Categories",
+    "view_all": "View All Categories",
+    "search": "Search",
+    "login": "Sign In",
+    "join": "Join Now",
     "checkout": "Checkout"
   },
   "homePage": {
@@ -149,6 +156,7 @@
     "reviews": "reviews",
     "rating": "Rating",
     "save": "Save",
+    "adding": "Adding...",
     "productAdded": "{{quantity}} {{name}} added to cart"
   },
   "loginPage": {
@@ -176,21 +184,41 @@
     "rememberMe": "rememberMe"
   },
   "registerPage": {
+    "title": "Create an account",
+    "subtitle": "Join Smart S3r today",
     "createAccount": "Create Account",
+    "creatingAccount": "Creating account...",
     "pleaseEnterDetails": "Please enter your details to create an account",
+    "fullName": "Full Name",
+    "name": "Name",
+    "email": "Email Address",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
     "namePlaceholder": "John Doe",
     "emailPlaceholder": "name@example.com",
-    "passwordPlaceholder": "Enter your password",
-    "confirmPasswordPlaceholder": "Confirm your password",
-    "name": "Name",
-    "confirmPassword": "Confirm Password",
+    "passwordPlaceholder": "••••••••",
+    "confirmPasswordPlaceholder": "••••••••",
     "nameMinLength": "Name must be at least 2 characters",
     "invalidEmail": "Invalid email address",
     "passwordMinLength": "Password must be at least 6 characters",
     "passwordsDontMatch": "Passwords don't match",
+    "passwordReqLength": "6+ chars",
+    "passwordReqUppercase": "Uppercase",
+    "passwordReqNumber": "Number",
+    "agreeTermsError": "Please agree to the terms and conditions",
+    "agreeTo": "I agree to the",
+    "termsOfService": "Terms of Service",
+    "and": "and",
+    "privacyPolicy": "Privacy Policy",
+    "successMessage": "Account created successfully!",
+    "registrationFailed": "Registration failed",
+    "errorLabel": "Error",
     "createAccountButton": "Create Account",
     "alreadyHaveAccount": "Already have an account?",
-    "signIn": "Sign In",
+    "signIn": "Sign in",
+    "backgroundAlt": "Register background",
+    "quote": "Join the future of SaaS",
+    "quoteAuthor": "Start your journey with Smart S3r today.",
     "theFutureOfTechIsHere": "The Future of Tech is Here.",
     "experienceNextGen": "Experience next generation of electronics shopping.",
     "smartS3rBringsYou": "Smart S3r brings you the latest gadgets with unbeatable prices and rapid delivery.",
@@ -213,39 +241,43 @@
       "title": "Create Your Account",
       "subtitle": "Let's get started with your basic information",
       "fullName": "Full Name",
-      "fullNamePlaceholder": "John Doe",
       "email": "Email Address",
-      "emailPlaceholder": "john@example.com",
       "password": "Password",
-      "passwordPlaceholder": "Create a strong password",
       "confirmPassword": "Confirm Password",
-      "confirmPasswordPlaceholder": "Confirm your password",
       "passwordRequirements": "Password requirements: Minimum 6 characters",
+      "placeholders": {
+        "name": "John Doe",
+        "email": "john@example.com",
+        "password": "Create a strong password",
+        "confirmPassword": "Confirm your password"
+      },
       "errors": {
         "nameRequired": "Full name is required",
         "emailRequired": "Email is required",
         "emailInvalid": "Please enter a valid email",
         "passwordRequired": "Password is required",
         "passwordMinLength": "Password must be at least 6 characters",
-        "passwordsDontMatch": "Passwords do not match"
+        "passwordsNotMatch": "Passwords do not match"
       }
     },
     "step2": {
       "title": "Personal Information",
       "subtitle": "Add your contact details (optional)",
       "phone": "Phone Number",
-      "phonePlaceholder": "+20 123 456 7890",
-      "phoneHelper": "Optional, but recommended for order updates"
+      "phoneHelper": "Optional, but recommended for order updates",
+      "placeholder": "+20 123 456 7890"
     },
     "step3": {
       "title": "Delivery Address",
       "subtitle": "Where should we deliver your orders? (optional)",
       "streetAddress": "Street Address",
-      "streetPlaceholder": "123 Main Street, Apt 4B",
       "city": "City",
-      "cityPlaceholder": "Cairo",
       "country": "Country",
-      "countryPlaceholder": "Egypt"
+      "placeholders": {
+        "address": "123 Main Street, Apt 4B",
+        "city": "Cairo",
+        "country": "Egypt"
+      }
     },
     "step4": {
       "title": "Profile Photo",
@@ -253,7 +285,13 @@
       "uploadPhoto": "Upload Photo",
       "fileTypes": "SVG, PNG, JPG or GIF (MAX. 2MB)",
       "tip": "A profile photo helps us personalize your experience",
-      "almostDone": "Almost done! Click \"Create Account\" to complete your registration"
+      "almostDone": "Almost done! Click \"Create Account\" to complete your registration",
+      "avatarPreview": "Avatar Preview",
+      "remove": "Remove"
+    },
+    "successMessage": "Account created successfully! Welcome to Smart S3r.",
+    "errors": {
+      "registrationFailed": "Registration failed. Please try again."
     },
     "navigation": {
       "back": "Back",
@@ -335,15 +373,30 @@
       },
       "errors": {
         "unableToLoad": "Unable to load dashboard",
-        "tryAgain": "Try Again"
-      }
+        "tryAgain": "Try Again",
+        "unknownError": "Unknown error occurred"
+      },
+      "noRecentOrders": "No recent orders found"
     },
     "categories": {
       "title": "Categories",
       "subtitle": "Manage product categories",
       "addCategory": "Add Category",
       "searchPlaceholder": "Search categories...",
+      "success": {
+        "created": "Category created successfully",
+        "updated": "Category updated successfully",
+        "deleted": "Category deleted successfully"
+      },
+      "errors": {
+        "createFailed": "Failed to create category",
+        "updateFailed": "Failed to update category",
+        "deleteFailed": "Failed to delete category",
+        "unableToLoad": "Unable to load categories",
+        "tryAgain": "Try Again"
+      },
       "table": {
+        "image": "Image",
         "name": "Name",
         "description": "Description",
         "products": "Products",
@@ -368,13 +421,18 @@
       "deleteModal": {
         "title": "Delete Category",
         "warning": "Are you sure you want to delete",
+        "productsCount": "This category contains {{count}} products. They will be uncategorized.",
         "productsWarning": "{{count}} products will become uncategorized. Continue?",
         "cannotUndo": "This action cannot be undone.",
         "cancel": "Cancel",
         "delete": "Delete",
         "deleting": "Deleting..."
       },
-      "empty": "No categories found"
+      "empty": "No categories found",
+      "pagination": {
+        "showing": "Showing {{from}}-{{to}} of {{total}}",
+        "page": "Page {{current}} of {{total}}"
+      }
     },
     "products": {
       "title": "Products",
@@ -439,22 +497,68 @@
         "export": "Export",
         "template": "Download Template"
       },
-      "empty": "No products found"
+      "empty": "No products found",
+      "stock": {
+        "inStock": "In Stock",
+        "lowStock": "Low Stock",
+        "outOfStock": "Out of Stock"
+      },
+      "pagination": {
+        "showing": "Showing {{from}}-{{to}} of {{total}}",
+        "page": "Page {{current}} of {{total}}"
+      },
+      "success": {
+        "updated": "Product updated successfully",
+        "created": "Product created successfully",
+        "deleted": "Product deleted successfully",
+        "bulkDeleted": "{{count}} products deleted successfully",
+        "bulkCategoryUpdated": "{{count}} products updated successfully",
+        "bulkStatusUpdated": "{{count}} products status updated successfully",
+        "imported": "Products imported successfully",
+        "exported": "Products exported successfully",
+        "templateDownloaded": "Template downloaded successfully"
+      },
+      "errors": {
+        "updateFailed": "Failed to update product",
+        "createFailed": "Failed to create product",
+        "deleteFailed": "Failed to delete product",
+        "importFailed": "Failed to import products",
+        "exportFailed": "Failed to export products",
+        "templateDownloadFailed": "Failed to download template",
+        "unableToLoad": "Unable to load products",
+        "tryAgain": "Try Again"
+      },
+      "deleteModal": {
+        "title": "Delete Product",
+        "confirm": "Are you sure you want to delete {{name}}?",
+        "cannotUndo": "This action cannot be undone.",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "deleting": "Deleting..."
+      },
+      "bulkDeleteModal": {
+        "title": "Delete Products",
+        "confirm": "Are you sure you want to delete {{count}} products?",
+        "deleteAll": "Delete Selected"
+      },
+      "uncategorized": "Uncategorized",
+      "importing": "Importing...",
+      "import": "Import",
+      "export": "Export",
+      "exportProducts": "Export Products",
+      "downloadTemplate": "Download Template",
+      "toggleStatus": "Toggle Status",
+      "delete": "Delete",
+      "clear": "Clear",
+      "selected": "{{count}} products selected",
+      "changeCategory": "Change Category",
+      "addProductDesc": "Create a new product"
     },
     "orders": {
       "title": "Orders",
       "subtitle": "Manage and track all customer orders",
       "searchPlaceholder": "Search orders...",
       "export": "Export",
-      "filters": {
-        "allStatuses": "All Statuses",
-        "pending": "Pending",
-        "confirmed": "Confirmed",
-        "processing": "Processing",
-        "shipped": "Shipped",
-        "delivered": "Delivered",
-        "cancelled": "Cancelled"
-      },
       "table": {
         "orderNumber": "Order #",
         "customer": "Customer",
@@ -473,8 +577,6 @@
         "cancelled": "Cancelled"
       },
       "bulkActions": {
-        "selected": "{{count}} orders selected",
-        "clear": "Clear",
         "updateStatus": "Update Status"
       },
       "modal": {
@@ -491,7 +593,52 @@
         },
         "close": "Close"
       },
-      "empty": "No orders found"
+      "empty": "No orders found",
+      "live": "Live updates",
+      "offline": "Offline",
+      "exportAll": "Export All",
+      "vsYesterday": "vs yesterday",
+      "stats": {
+        "todayOrders": "Today's Orders",
+        "pending": "Pending Orders",
+        "processing": "Processing Orders",
+        "completedToday": "Completed Today"
+      },
+      "filters": {
+        "today": "Today",
+        "last7Days": "Last 7 Days",
+        "thisMonth": "This Month",
+        "clearDates": "Clear Dates",
+        "allStatuses": "All Statuses",
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "processing": "Processing",
+        "shipped": "Shipped",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled"
+      },
+      "chooseAction": "Choose an action",
+      "updateStatus": "Update Status",
+      "cancelOrder": "Cancel Order",
+      "print": "Print",
+      "clear": "Clear",
+      "selected": "{{count}} orders selected",
+      "itemCount": "{{count}} items",
+      "viewOrderDetails": "View Order Details",
+      "newOrderReceived": "New order received: #{{id}}",
+      "statusUpdated": "Order #{{id}} status updated to {{status}}",
+      "bulkStatusUpdated": "{{count}} orders status updated to {{status}}",
+      "exported": "Orders exported successfully",
+      "exportedSelected": "{{count}} selected orders exported",
+      "errors": {
+        "statusUpdateFailed": "Failed to update order status",
+        "bulkUpdateFailed": "Failed to update orders status",
+        "exportFailed": "Failed to export orders"
+      },
+      "pagination": {
+        "showing": "Showing {{from}}-{{to}} of {{total}}",
+        "page": "Page {{current}} of {{total}}"
+      }
     },
     "sidebar": {
       "dashboard": "Dashboard",

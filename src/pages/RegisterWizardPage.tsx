@@ -15,38 +15,30 @@ import {
   Check,
   Eye,
   EyeOff,
-  ArrowRight
+  ArrowRight,
+  X
 } from 'lucide-react';
 import { 
   Button, 
-  Card, 
   Label, 
   TextInput,
   FileInput,
-  Badge,
-  Alert,
-  Progress
+  Progress,
+  Spinner
 } from 'flowbite-react';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
 import api from '@/services/api';
 
 interface RegistrationData {
-  // Step 1: Account
   name: string;
   email: string;
   password: string;
   confirmPassword: string;
-  
-  // Step 2: Personal
   phone: string;
-  
-  // Step 3: Address
   address: string;
   city: string;
   country: string;
-  
-  // Step 4: Profile
   avatar?: string;
 }
 
@@ -103,7 +95,6 @@ export default function RegisterWizardPage() {
 
   const handleInputChange = (field: keyof RegistrationData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user types
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
@@ -158,17 +149,14 @@ export default function RegisterWizardPage() {
     setIsLoading(true);
     
     try {
-      // Step 1: Register user
       const registerResponse = await api.post('/auth/register', {
         name: formData.name,
         email: formData.email,
         password: formData.password,
       });
       
-      // Login the user
       login(registerResponse.data);
       
-      // Upload avatar if selected
       let avatarUrl = formData.avatar;
       if (avatarFile) {
         const uploadedUrl = await uploadAvatar();
@@ -177,7 +165,6 @@ export default function RegisterWizardPage() {
         }
       }
       
-      // Update profile with additional info
       if (formData.phone || formData.address || formData.city || formData.country || avatarUrl) {
         await api.post('/api/users/profile', {
           phone: formData.phone,
@@ -237,128 +224,139 @@ export default function RegisterWizardPage() {
 
   const renderStep1 = () => (
     <div className="space-y-5">
-      <div className="text-center mb-6">
+      <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900">{t('registerWizard.step1.title')}</h2>
         <p className="text-gray-600 mt-1">{t('registerWizard.step1.subtitle')}</p>
       </div>
       
       <div>
-        <Label htmlFor="name" className="mb-2 block">
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-gray-500" />
-            {t('registerWizard.step1.fullName')} <span className="text-red-500">*</span>
-          </div>
+        <Label htmlFor="name" className="mb-2 block text-sm font-medium text-gray-700">
+          {t('registerWizard.step1.fullName')} <span className="text-red-500">*</span>
         </Label>
-        <TextInput
-          id="name"
-          type="text"
-          placeholder={t('registerWizard.step1.placeholders.name')}
-          value={formData.name}
-          onChange={(e) => handleInputChange('name', e.target.value)}
-          color={errors.name ? 'failure' : undefined}
-        />
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <User className="h-5 w-5 text-gray-400" />
+          </div>
+          <TextInput
+            id="name"
+            type="text"
+            placeholder={t('registerWizard.step1.placeholders.name')}
+            value={formData.name}
+            onChange={(e) => handleInputChange('name', e.target.value)}
+            color={errors.name ? 'failure' : 'gray'}
+            className="pl-10 [&_input]:h-11"
+          />
+        </div>
         {errors.name && <p className="text-sm text-red-600 mt-1">{errors.name}</p>}
       </div>
       
       <div>
-        <Label htmlFor="email" className="mb-2 block">
-          <div className="flex items-center gap-2">
-            <Mail className="w-4 h-4 text-gray-500" />
-            {t('registerWizard.step1.email')} <span className="text-red-500">*</span>
-          </div>
+        <Label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700">
+          {t('registerWizard.step1.email')} <span className="text-red-500">*</span>
         </Label>
-        <TextInput
-          id="email"
-          type="email"
-          placeholder={t('registerWizard.step1.placeholders.email')}
-          value={formData.email}
-          onChange={(e) => handleInputChange('email', e.target.value)}
-          color={errors.email ? 'failure' : undefined}
-        />
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Mail className="h-5 w-5 text-gray-400" />
+          </div>
+          <TextInput
+            id="email"
+            type="email"
+            placeholder={t('registerWizard.step1.placeholders.email')}
+            value={formData.email}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+            color={errors.email ? 'failure' : 'gray'}
+            className="pl-10 [&_input]:h-11"
+          />
+        </div>
         {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
       </div>
       
       <div>
-        <Label htmlFor="password" className="mb-2 block">
-          <div className="flex items-center gap-2">
-            <Lock className="w-4 h-4 text-gray-500" />
-            {t('registerWizard.step1.password')} <span className="text-red-500">*</span>
-          </div>
+        <Label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-700">
+          {t('registerWizard.step1.password')} <span className="text-red-500">*</span>
         </Label>
         <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Lock className="h-5 w-5 text-gray-400" />
+          </div>
           <TextInput
             id="password"
             type={showPassword ? 'text' : 'password'}
             placeholder={t('registerWizard.step1.placeholders.password')}
             value={formData.password}
             onChange={(e) => handleInputChange('password', e.target.value)}
-            color={errors.password ? 'failure' : undefined}
+            color={errors.password ? 'failure' : 'gray'}
+            className="pl-10 pr-10 [&_input]:h-11"
           />
-          {errors.password && <p className="text-sm text-red-600 mt-1">{errors.password}</p>}
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
           >
-            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
           </button>
         </div>
+        {errors.password && <p className="text-sm text-red-600 mt-1">{errors.password}</p>}
       </div>
       
       <div>
-        <Label htmlFor="confirmPassword" className="mb-2 block">
-          <div className="flex items-center gap-2">
-            <Lock className="w-4 h-4 text-gray-500" />
-            {t('registerWizard.step1.confirmPassword')} <span className="text-red-500">*</span>
-          </div>
+        <Label htmlFor="confirmPassword" className="mb-2 block text-sm font-medium text-gray-700">
+          {t('registerWizard.step1.confirmPassword')} <span className="text-red-500">*</span>
         </Label>
         <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Lock className="h-5 w-5 text-gray-400" />
+          </div>
           <TextInput
             id="confirmPassword"
             type={showConfirmPassword ? 'text' : 'password'}
             placeholder={t('registerWizard.step1.placeholders.confirmPassword')}
             value={formData.confirmPassword}
             onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-            color={errors.confirmPassword ? 'failure' : undefined}
+            color={errors.confirmPassword ? 'failure' : 'gray'}
+            className="pl-10 pr-10 [&_input]:h-11"
           />
-          {errors.confirmPassword && <p className="text-sm text-red-600 mt-1">{errors.confirmPassword}</p>}
           <button
             type="button"
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
           >
-            {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
           </button>
         </div>
+        {errors.confirmPassword && <p className="text-sm text-red-600 mt-1">{errors.confirmPassword}</p>}
       </div>
       
-      <Alert color="info">
+      <p className="text-xs text-gray-500">
         {t('registerWizard.step1.passwordRequirements')}
-      </Alert>
+      </p>
     </div>
   );
 
   const renderStep2 = () => (
     <div className="space-y-5">
-      <div className="text-center mb-6">
+      <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900">{t('registerWizard.step2.title')}</h2>
         <p className="text-gray-600 mt-1">{t('registerWizard.step2.subtitle')}</p>
       </div>
       
       <div>
-        <Label htmlFor="phone" className="mb-2 block">
-          <div className="flex items-center gap-2">
-            <Phone className="w-4 h-4 text-gray-500" />
-            {t('registerWizard.step2.phone')}
-          </div>
+        <Label htmlFor="phone" className="mb-2 block text-sm font-medium text-gray-700">
+          {t('registerWizard.step2.phone')}
         </Label>
-        <TextInput
-          id="phone"
-          type="tel"
-          placeholder={t('registerWizard.step2.placeholder')}
-          value={formData.phone}
-          onChange={(e) => handleInputChange('phone', e.target.value)}
-        />
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Phone className="h-5 w-5 text-gray-400" />
+          </div>
+          <TextInput
+            id="phone"
+            type="tel"
+            placeholder={t('registerWizard.step2.placeholder')}
+            value={formData.phone}
+            onChange={(e) => handleInputChange('phone', e.target.value)}
+            className="pl-10 [&_input]:h-11"
+          />
+        </div>
         <p className="text-sm text-gray-500 mt-1">{t('registerWizard.step2.phoneHelper')}</p>
       </div>
     </div>
@@ -366,64 +364,73 @@ export default function RegisterWizardPage() {
 
   const renderStep3 = () => (
     <div className="space-y-5">
-      <div className="text-center mb-6">
+      <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900">{t('registerWizard.step3.title')}</h2>
         <p className="text-gray-600 mt-1">{t('registerWizard.step3.subtitle')}</p>
       </div>
       
       <div>
-        <Label htmlFor="address" className="mb-2 block">
-          <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-gray-500" />
-            {t('registerWizard.step3.streetAddress')}
-          </div>
+        <Label htmlFor="address" className="mb-2 block text-sm font-medium text-gray-700">
+          {t('registerWizard.step3.streetAddress')}
         </Label>
-        <TextInput
-          id="address"
-          type="text"
-          placeholder={t('registerWizard.step3.placeholders.address')}
-          value={formData.address}
-          onChange={(e) => handleInputChange('address', e.target.value)}
-        />
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <MapPin className="h-5 w-5 text-gray-400" />
+          </div>
+          <TextInput
+            id="address"
+            type="text"
+            placeholder={t('registerWizard.step3.placeholders.address')}
+            value={formData.address}
+            onChange={(e) => handleInputChange('address', e.target.value)}
+            className="pl-10 [&_input]:h-11"
+          />
+        </div>
       </div>
       
       <div>
-        <Label htmlFor="city" className="mb-2 block">
-          <div className="flex items-center gap-2">
-            <Building className="w-4 h-4 text-gray-500" />
-            {t('registerWizard.step3.city')}
-          </div>
+        <Label htmlFor="city" className="mb-2 block text-sm font-medium text-gray-700">
+          {t('registerWizard.step3.city')}
         </Label>
-        <TextInput
-          id="city"
-          type="text"
-          placeholder={t('registerWizard.step3.placeholders.city')}
-          value={formData.city}
-          onChange={(e) => handleInputChange('city', e.target.value)}
-        />
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Building className="h-5 w-5 text-gray-400" />
+          </div>
+          <TextInput
+            id="city"
+            type="text"
+            placeholder={t('registerWizard.step3.placeholders.city')}
+            value={formData.city}
+            onChange={(e) => handleInputChange('city', e.target.value)}
+            className="pl-10 [&_input]:h-11"
+          />
+        </div>
       </div>
       
       <div>
-        <Label htmlFor="country" className="mb-2 block">
-          <div className="flex items-center gap-2">
-            <Globe className="w-4 h-4 text-gray-500" />
-            {t('registerWizard.step3.country')}
-          </div>
+        <Label htmlFor="country" className="mb-2 block text-sm font-medium text-gray-700">
+          {t('registerWizard.step3.country')}
         </Label>
-        <TextInput
-          id="country"
-          type="text"
-          placeholder={t('registerWizard.step3.placeholders.country')}
-          value={formData.country}
-          onChange={(e) => handleInputChange('country', e.target.value)}
-        />
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Globe className="h-5 w-5 text-gray-400" />
+          </div>
+          <TextInput
+            id="country"
+            type="text"
+            placeholder={t('registerWizard.step3.placeholders.country')}
+            value={formData.country}
+            onChange={(e) => handleInputChange('country', e.target.value)}
+            className="pl-10 [&_input]:h-11"
+          />
+        </div>
       </div>
     </div>
   );
 
   const renderStep4 = () => (
     <div className="space-y-5">
-      <div className="text-center mb-6">
+      <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900">{t('registerWizard.step4.title')}</h2>
         <p className="text-gray-600 mt-1">{t('registerWizard.step4.subtitle')}</p>
       </div>
@@ -445,9 +452,7 @@ export default function RegisterWizardPage() {
                 className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
               >
                 <span className="sr-only">{t('registerWizard.step4.remove')}</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="w-4 h-4" />
               </button>
             </div>
           ) : (
@@ -458,7 +463,7 @@ export default function RegisterWizardPage() {
         </div>
         
         <div className="w-full">
-          <Label htmlFor="avatar" className="mb-2 block">
+          <Label htmlFor="avatar" className="mb-2 block text-sm font-medium text-gray-700">
             <div className="flex items-center gap-2">
               <Camera className="w-4 h-4 text-gray-500" />
               {t('registerWizard.step4.uploadPhoto')}
@@ -473,23 +478,24 @@ export default function RegisterWizardPage() {
         </div>
       </div>
       
-      <Alert color="success">
-        {t('registerWizard.step4.almostDone')}
-      </Alert>
+      <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+        <p className="text-sm text-green-800">{t('registerWizard.step4.almostDone')}</p>
+      </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg">
-        <div className="p-6">
-          {/* Header */}
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4">
-              <User className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('registerWizard.title')}</h1>
-            <p className="text-gray-600 mt-1">{t('registerWizard.subtitle')}</p>
+    <div className="flex min-h-screen w-full bg-white">
+      {/* Left Side - Form */}
+      <div className="flex w-full flex-col justify-center px-4 py-12 sm:px-6 lg:w-1/2 lg:px-20 xl:px-24">
+        <div className="mx-auto w-full max-w-lg">
+          <div className="mb-8">
+            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900">
+              {t('registerWizard.title')}
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              {t('registerWizard.subtitle')}
+            </p>
           </div>
           
           {/* Step Indicator */}
@@ -537,7 +543,7 @@ export default function RegisterWizardPage() {
                 >
                   {isLoading ? (
                     <>
-                      <span className="animate-spin">⏳</span>
+                      <Spinner size="sm" className="mr-2" />
                       {t('registerWizard.navigation.creating')}
                     </>
                   ) : (
@@ -552,19 +558,39 @@ export default function RegisterWizardPage() {
           </div>
           
           {/* Login Link */}
-          <div className="mt-6 text-center">
+          <div className="mt-8 text-center">
             <p className="text-sm text-gray-600">
               {t('registerWizard.navigation.alreadyHaveAccount')}{' '}
               <button
                 onClick={() => navigate('/login')}
-                className="text-gray-900 font-semibold hover:underline"
+                className="font-semibold text-blue-600 hover:text-blue-500"
               >
                 {t('registerWizard.navigation.signIn')}
               </button>
             </p>
           </div>
         </div>
-      </Card>
+      </div>
+
+      {/* Right Side - Image/Visual */}
+      <div className="hidden relative lg:block lg:w-1/2">
+        <div className="absolute inset-0 bg-gray-900">
+          <img
+            className="h-full w-full object-cover opacity-80"
+            src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=2000&q=80"
+            alt="Register background"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 p-20 text-white">
+          <h3 className="text-4xl font-bold mb-4">
+            {t('registerPage.theFutureOfTechIsHere')}
+          </h3>
+          <p className="text-lg text-gray-300">
+            {t('registerPage.smartS3rBringsYou')}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

@@ -9,8 +9,9 @@ import {
   Check,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -26,6 +27,7 @@ import api from "@/services/api";
 import { useAuthStore } from "@/store/authStore";
 
 export default function RegisterPage() {
+  const { t, i18n } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,17 +36,20 @@ export default function RegisterPage() {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
 
-  const registerSchema = z
+  // Create the schema with current translations
+  const getRegisterSchema = () => z
     .object({
-      name: z.string().min(2, "Name must be at least 2 characters"),
-      email: z.string().email("Invalid email address"),
-      password: z.string().min(6, "Password must be at least 6 characters"),
+      name: z.string().min(2, { message: t("registerPage.nameMinLength") }),
+      email: z.string().email({ message: t("registerPage.invalidEmail") }),
+      password: z.string().min(6, { message: t("registerPage.passwordMinLength") }),
       confirmPassword: z.string(),
     })
     .refine((data) => data.password === data.confirmPassword, {
-      message: "Passwords don't match",
+      message: t("registerPage.passwordsDontMatch"),
       path: ["confirmPassword"],
     });
+
+  const registerSchema = getRegisterSchema();
 
   type RegisterFormValues = z.infer<typeof registerSchema>;
 
@@ -53,6 +58,7 @@ export default function RegisterPage() {
     handleSubmit,
     formState: { errors },
     watch,
+    reset,
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -63,11 +69,32 @@ export default function RegisterPage() {
     },
   });
 
+  // Handle language change by resetting the form to update validation messages
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      // Reset the form with current values to refresh validation with new language
+      const currentValues = {
+        name: watch('name'),
+        email: watch('email'),
+        password: watch('password'),
+        confirmPassword: watch('confirmPassword'),
+      };
+      reset(currentValues, { keepErrors: false }); // This will re-validate with new language
+    };
+
+    // Listen for language change
+    i18n.on('languageChanged', handleLanguageChange);
+
+    return () => {
+      i18n.off('languageChanged', handleLanguageChange);
+    };
+  }, [i18n, reset, watch]);
+
   const password = watch("password");
 
   const onSubmit = async (data: RegisterFormValues) => {
     if (!agreeTerms) {
-      toast.error("Please agree to the terms and conditions");
+      toast.error(t("registerPage.agreeTermsError"));
       return;
     }
 
@@ -81,7 +108,7 @@ export default function RegisterPage() {
         password: data.password,
       });
       login(response.data);
-      toast.success("Account created successfully!");
+      toast.success(t("registerPage.successMessage"));
       navigate("/onboarding");
     } catch (error) {
       console.error("Registration Error:", error);
@@ -89,9 +116,9 @@ export default function RegisterPage() {
         error instanceof Error && "response" in error
           ? (error as { response?: { data?: { message?: string } } })
             .response?.data?.message
-          : "Registration failed";
-      setError(errorMessage || "Registration failed");
-      toast.error(errorMessage || "Registration failed");
+          : t("registerPage.registrationFailed");
+      setError(errorMessage || t("registerPage.registrationFailed"));
+      toast.error(errorMessage || t("registerPage.registrationFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -109,28 +136,28 @@ export default function RegisterPage() {
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <div className="mb-10">
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900">
-              Create an account
+              {t("registerPage.title")}
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Join Smart S3r today
+              {t("registerPage.subtitle")}
             </p>
           </div>
 
           {error && (
             <Alert color="failure" className="mb-6">
-              <span className="font-medium">Error:</span> {error}
+              <span className="font-medium">{t("registerPage.errorLabel")}:</span> {error}
             </Alert>
           )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
               <Label htmlFor="name" className="mb-2 block text-sm font-medium text-gray-700">
-                Full Name
+                {t("registerPage.fullName")}
               </Label>
               <TextInput
                 id="name"
                 type="text"
-                placeholder="John Doe"
+                placeholder={t("registerPage.namePlaceholder")}
                 icon={User}
                 color={errors.name ? "failure" : "gray"}
                 {...register("name")}
@@ -145,12 +172,12 @@ export default function RegisterPage() {
 
             <div>
               <Label htmlFor="email" className="mb-2 block text-sm font-medium text-gray-700">
-                Email Address
+                {t("registerPage.email")}
               </Label>
               <TextInput
                 id="email"
                 type="email"
-                placeholder="name@example.com"
+                placeholder={t("registerPage.emailPlaceholder")}
                 icon={Mail}
                 color={errors.email ? "failure" : "gray"}
                 {...register("email")}
@@ -165,13 +192,13 @@ export default function RegisterPage() {
 
             <div>
               <Label htmlFor="password" className="mb-2 block text-sm font-medium text-gray-700">
-                Password
+                {t("registerPage.password")}
               </Label>
               <div className="relative">
                 <TextInput
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
+                  placeholder={t("registerPage.passwordPlaceholder")}
                   icon={Lock}
                   color={errors.password ? "failure" : "gray"}
                   {...register("password")}
@@ -207,7 +234,7 @@ export default function RegisterPage() {
                     ) : (
                       <X className="h-3 w-3" />
                     )}
-                    6+ chars
+                    {t("registerPage.passwordReqLength")}
                   </span>
                   <span
                     className={`text-xs flex items-center gap-1.5 ${hasUpperCase ? "text-green-600 font-medium" : "text-gray-500"
@@ -218,7 +245,7 @@ export default function RegisterPage() {
                     ) : (
                       <X className="h-3 w-3" />
                     )}
-                    Uppercase
+                    {t("registerPage.passwordReqUppercase")}
                   </span>
                   <span
                     className={`text-xs flex items-center gap-1.5 ${hasNumber ? "text-green-600 font-medium" : "text-gray-500"
@@ -229,7 +256,7 @@ export default function RegisterPage() {
                     ) : (
                       <X className="h-3 w-3" />
                     )}
-                    Number
+                    {t("registerPage.passwordReqNumber")}
                   </span>
                 </div>
               )}
@@ -237,13 +264,13 @@ export default function RegisterPage() {
 
             <div>
               <Label htmlFor="confirmPassword" className="mb-2 block text-sm font-medium text-gray-700">
-                Confirm Password
+                {t("registerPage.confirmPassword")}
               </Label>
               <div className="relative">
                 <TextInput
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="••••••••"
+                  placeholder={t("registerPage.confirmPasswordPlaceholder")}
                   icon={Lock}
                   color={errors.confirmPassword ? "failure" : "gray"}
                   {...register("confirmPassword")}
@@ -276,13 +303,13 @@ export default function RegisterPage() {
                 className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-1"
               />
               <Label htmlFor="agree" className="text-sm text-gray-600">
-                I agree to the{" "}
+                {t("registerPage.agreeTo")}{" "}
                 <Link to="/terms" className="text-blue-600 hover:underline">
-                  Terms of Service
+                  {t("registerPage.termsOfService")}
                 </Link>{" "}
-                and{" "}
+                {t("registerPage.and")}{" "}
                 <Link to="/privacy" className="text-blue-600 hover:underline">
-                  Privacy Policy
+                  {t("registerPage.privacyPolicy")}
                 </Link>
               </Label>
             </div>
@@ -296,11 +323,11 @@ export default function RegisterPage() {
               {isLoading ? (
                 <>
                   <Spinner className="mr-2" size="sm" />
-                  Creating account...
+                  {t("registerPage.creatingAccount")}
                 </>
               ) : (
                 <>
-                  Create Account
+                  {t("registerPage.createAccount")}
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </>
               )}
@@ -308,12 +335,12 @@ export default function RegisterPage() {
           </form>
 
           <p className="mt-8 text-center text-sm text-gray-600">
-            Already have an account?{" "}
+            {t("registerPage.alreadyHaveAccount")}{" "}
             <Link
               to="/login"
               className="font-semibold text-blue-600 hover:text-blue-500"
             >
-              Sign in
+              {t("registerPage.signIn")}
             </Link>
           </p>
         </div>
@@ -325,16 +352,16 @@ export default function RegisterPage() {
           <img
             className="h-full w-full object-cover opacity-80"
             src="https://images.unsplash.com/photo-1498049860654-af1e5e5667ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80"
-            alt="Register background"
+            alt={t("registerPage.backgroundAlt")}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
         </div>
         <div className="absolute bottom-0 left-0 right-0 p-20 text-white">
           <h3 className="text-4xl font-bold mb-4">
-            "Join the future of SaaS"
+            {t("registerPage.quote")}
           </h3>
           <p className="text-lg text-gray-300">
-            Start your journey with Smart S3r today.
+            {t("registerPage.quoteAuthor")}
           </p>
         </div>
       </div>
