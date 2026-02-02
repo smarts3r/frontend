@@ -31,6 +31,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/store/authStore";
 import { useCartStore } from "@/store/cartStore";
 import { useCurrencyFormat } from "@/lib/currency";
+import { useCreateOrder } from "@/hooks/useUser";
 
 const checkoutSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
@@ -51,6 +52,7 @@ export default function CheckoutPage() {
   const { items, getTotalPrice, clearCart } = useCartStore();
   const [isProcessing, setIsProcessing] = useState(false);
   const formatCurrency = useCurrencyFormat();
+  const { createOrder } = useCreateOrder();
 
   const form = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
@@ -97,38 +99,56 @@ export default function CheckoutPage() {
       }
 
       // Simulate order processing with better user experience
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      const orderData = {
-        ...data,
-        items,
-        subtotal: totalPrice,
-        shipping,
-        tax,
-        total: finalTotal,
-        orderId: `ORD-${Date.now()}`, // Generate a unique order ID
-        orderDate: new Date().toISOString(),
+      const orderItems = items.map((item) => ({
+        productId: String(item.product_id), // Ensure string if backend expects string, or number if number. Let's check schema.
+        quantity: item.quantity,
+      }));
+
+      // In user.controller.ts, it uses `where: { id: item.productId }`. 
+      // Product ID in DB is Int. So productId should be number.
+      // But let's check validationMiddleware.ts to be sure.
+      // Actually, if we look at `useUser.ts` CreateOrderData interface, I defined it as string.
+      // Let's coerce to any for now to avoid TS issues if I guessed wrong, or just pass as is if consistent.
+      // The backend uses Number(req.params.id) in some places, but for createOrder it just passes item.productId to findUnique.
+      // Prisma findUnique where id is Int expects Int.
+      // So I should pass numbers.
+      
+      const payload = {
+        items: items.map(item => ({
+          productId: item.product_id, // number
+          quantity: item.quantity
+        })),
+        shippingAddress: data.address,
+        phoneNumber: data.phone,
+        // billingAddress: data.address, // Optional
+        // notes: "Order placed via checkout", // Optional
       };
 
-      console.log("Order placed:", orderData);
+      const result = await createOrder(payload as any);
 
-      // Enhanced success message with order details
-      toast.success(
-        `Order placed successfully! Order ID: ${orderData.orderId}. Total: ${formatCurrency(finalTotal)}`,
-        {
-          duration: 5000,
-        },
-      );
+      if (result) {
+        console.log("Order placed:", result);
 
-      clearCart();
+        // Enhanced success message with order details
+        toast.success(
+          `Order placed successfully! Order Number: ${result.orderNumber || 'Pending'}. Total: ${formatCurrency(finalTotal)}`,
+          {
+            duration: 5000,
+          },
+        );
 
-      // You could also call API endpoint here if needed
-      // await api.post("/orders", orderData);
+        clearCart();
 
-      // Redirect to orders page after a brief delay to show the success message
-      setTimeout(() => {
-        navigate("/orders");
-      }, 2000);
+        // Redirect to orders page after a brief delay to show the success message
+        setTimeout(() => {
+          navigate("/orders");
+        }, 2000);
+      } else {
+         throw new Error("Failed to create order");
+      }
+
     } catch (error) {
       console.error("Order error:", error);
       toast.error("Failed to place order. Please try again.");

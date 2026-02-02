@@ -176,7 +176,7 @@ export default function RegisterWizardPage() {
       }
       
       toast.success(t('registerWizard.successMessage'));
-      navigate('/home');
+      navigate('/');
     } catch (error: any) {
       console.error('Registration failed:', error);
       const errorMessage = error.response?.data?.message || t('registerWizard.errors.registrationFailed');

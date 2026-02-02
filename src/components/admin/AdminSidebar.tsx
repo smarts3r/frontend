@@ -37,8 +37,8 @@ export default function AdminSidebar({ isOpen, onClose, isConnected }: AdminSide
     { path: '/admin/orders', icon: ShoppingCart, label: t('admin.sidebar.orders') },
     { path: '/admin/products', icon: Package, label: t('admin.sidebar.products') },
     { path: '/admin/categories', icon: Folder, label: t('admin.sidebar.categories') },
-    { path: '/admin/users', icon: Users, label: t('admin.sidebar.users') },
-    { path: '/admin/settings', icon: Settings, label: t('admin.sidebar.settings') },
+    // { path: '/admin/users', icon: Users, label: t('admin.sidebar.users') },
+    // { path: '/admin/settings', icon: Settings, label: t('admin.sidebar.settings') },
   ];
 
   const sidebarWidth = collapsed ? 'w-20' : 'w-64';

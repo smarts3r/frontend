@@ -29,14 +29,50 @@ import {
 } from "flowbite-react";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/authStore";
-import { useUpdateUserProfile, useUpdateUserAddress } from "@/hooks/useUser";
+import { useUpdateUserProfile, useUpdateUserAddress, useGetUserProfile, useUploadUserImage } from "@/hooks/useUser";
+import { useEffect, useRef } from "react";
 
 export default function ProfilePage() {
   const { user, logout, updateUser } = useAuthStore();
   const navigate = useNavigate();
 
+  const { getUserProfile } = useGetUserProfile();
   const { updateUserProfile, loading: profileLoading } = useUpdateUserProfile();
   const { updateUserAddress, loading: addressLoading } = useUpdateUserAddress();
+  const { uploadUserImage, loading: uploadLoading } = useUploadUserImage();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const data = await getUserProfile();
+      if (data && user) {
+        updateUser({
+          ...user,
+          profile: {
+            ...user.profile,
+            ...data,
+          }
+        });
+        
+        // Update local state with fetched data
+        setProfileForm({
+          first_name: data.first_name || "",
+          last_name: data.last_name || "",
+          phone: data.phone || "",
+        });
+        
+        setAddressForm({
+          address: data.address || "",
+          city: data.city || "",
+          state: data.state || "",
+          zip_code: data.zip_code || "",
+          country: data.country || "",
+        });
+      }
+    };
+    
+    fetchProfile();
+  }, [getUserProfile]);
 
   const [activeTab, setActiveTab] = useState("profile");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -99,9 +135,7 @@ export default function ProfilePage() {
         updateUser({
           ...user,
           profile: {
-            id: user.profile?.id || 0,
-            user_id: user.id,
-            ...user.profile,
+            ...user.profile!,
             ...addressForm,
           },
         });
@@ -109,6 +143,48 @@ export default function ProfilePage() {
       setIsEditingAddress(false);
     } else {
       toast.error("Failed to update address");
+    }
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const uploadResult = await uploadUserImage(formData);
+    
+    if (uploadResult && uploadResult.url) {
+      const updateResult = await updateUserProfile({
+        img: uploadResult.url
+      });
+
+      if (updateResult) {
+        toast.success("Profile image updated successfully");
+        if (user) {
+          updateUser({
+            ...user,
+            profile: {
+              ...user.profile!,
+              img: uploadResult.url,
+            },
+          });
+        }
+      } else {
+        toast.error("Failed to update profile with new image");
+      }
+    } else {
+      toast.error("Failed to upload image");
     }
   };
 
@@ -173,15 +249,26 @@ export default function ProfilePage() {
               {/* Avatar with upload button */}
               <div className="relative flex-shrink-0">
                 <Avatar
-                  img={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+                  img={user.profile?.img || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
                   alt={user.username}
                   rounded
                   size="xl"
                   className="border-4 border-gray-100 w-20 h-20 sm:w-24 sm:h-24"
                 />
-                <button className="absolute bottom-0 right-0 bg-gray-900 text-white p-1.5 sm:p-2 rounded-full hover:bg-gray-800 transition-colors">
-                  <Camera className="w-3 h-3 sm:w-4 sm:h-4" />
+                <button 
+                  onClick={handleImageClick}
+                  disabled={uploadLoading}
+                  className="absolute bottom-0 right-0 bg-gray-900 text-white p-1.5 sm:p-2 rounded-full hover:bg-gray-800 transition-colors disabled:opacity-50"
+                >
+                  {uploadLoading ? <Spinner size="xs" /> : <Camera className="w-3 h-3 sm:w-4 sm:h-4" />}
                 </button>
+                <input 
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
               </div>
 
               {/* User Info */}

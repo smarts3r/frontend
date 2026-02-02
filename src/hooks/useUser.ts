@@ -23,6 +23,11 @@ export interface UserProfile {
   lastName?: string;
   phone?: string;
   address?: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
+  country?: string;
+  img?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -110,7 +115,7 @@ export const useToggleWishlist = () => {
 
 // Profile update hook
 export const useUpdateUserProfile = () => {
-  const { data, loading, error, execute, reset } = usePut<UserProfile>();
+  const { data, loading, error, execute, reset } = usePost<UserProfile>();
 
   const updateUserProfile = useCallback(async (profileData: Partial<UserProfile>) => {
     return execute('/api/user/profile', profileData);
@@ -129,11 +134,44 @@ export interface UserAddress {
 }
 
 export const useUpdateUserAddress = () => {
-  const { data, loading, error, execute, reset } = usePut<UserAddress>();
+  const { data, loading, error, execute, reset } = usePost<UserAddress>();
 
   const updateUserAddress = useCallback(async (addressData: UserAddress) => {
-    return execute('/api/user/address', addressData);
+    return execute('/api/user/profile', addressData);
   }, [execute]);
 
   return { data, loading, error, updateUserAddress, reset };
+};
+
+export const useUploadUserImage = () => {
+  const { data, loading, error, execute, reset } = usePost<{ url: string }>();
+
+  const uploadUserImage = useCallback(async (formData: FormData) => {
+    return execute('/api/user/upload', formData, {
+      headers: {
+        // Don't set Content-Type header for multipart/form-data
+        // Let the browser set it with the boundary
+      }
+    });
+  }, [execute]);
+
+  return { data, loading, error, uploadUserImage, reset };
+};
+
+export interface CreateOrderData {
+  items: { productId: string; quantity: number }[];
+  shippingAddress: string;
+  billingAddress?: string;
+  notes?: string;
+  phoneNumber: string;
+}
+
+export const useCreateOrder = () => {
+  const { data, loading, error, execute, reset } = usePost<any>();
+
+  const createOrder = useCallback(async (orderData: CreateOrderData) => {
+    return execute('/api/user/orders', orderData);
+  }, [execute]);
+
+  return { data, loading, error, createOrder, reset };
 };

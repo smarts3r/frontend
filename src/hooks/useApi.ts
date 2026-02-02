@@ -40,9 +40,14 @@ export function useApi<T>() {
       }
 
       // Set default headers
+      const isFormData = options.body instanceof FormData;
+      const defaultHeaders: Record<string, string> = isFormData 
+        ? {} 
+        : { 'Content-Type': 'application/json' };
+
       const config: RequestInit = {
         headers: {
-          'Content-Type': 'application/json',
+          ...defaultHeaders,
           ...(options.headers || {}),
         },
         ...options,
@@ -159,7 +164,7 @@ export const usePost = <T,>() => {
   const execute = useCallback(async (endpoint: string, body?: unknown, options: RequestInit = {}) => {
     return request(endpoint, {
       method: 'POST',
-      body: body ? JSON.stringify(body) : undefined,
+      body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
       ...options
     });
   }, [request]);
@@ -173,7 +178,7 @@ export const usePut = <T,>() => {
   const execute = useCallback(async (endpoint: string, body?: unknown, options: RequestInit = {}) => {
     return request(endpoint, {
       method: 'PUT',
-      body: body ? JSON.stringify(body) : undefined,
+      body: body instanceof FormData ? body : (body ? JSON.stringify(body) : undefined),
       ...options
     });
   }, [request]);

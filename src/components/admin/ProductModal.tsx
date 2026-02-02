@@ -73,13 +73,13 @@ export default function ProductModal({
   const [imageError, setImageError] = useState(false);
   const [imageTab, setImageTab] = useState<'url' | 'upload'>('url');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const { loading: uploading, execute: executeUpload } = useUploadFile();
+  const { loading: uploading, uploadFile: executeUpload } = useUploadFile();
   const modalRef = useRef<HTMLDivElement>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
 
-  // Initialize form data when modal opens
+
   useEffect(() => {
     if (isOpen) {
       previousActiveElement.current = document.activeElement as HTMLElement;
@@ -181,7 +181,7 @@ export default function ProductModal({
       errors.price = 'Price must be greater than 0';
     }
 
-    if (formData.old_price !== undefined && formData.old_price <= formData.price) {
+    if (formData.old_price && formData.old_price <= formData.price) {
       errors.old_price = 'Old price should be greater than regular price';
     }
 

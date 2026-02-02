@@ -84,6 +84,7 @@ export interface Profile {
   state?: string;
   zip_code?: string;
   country?: string;
+  img?: string;
   created_at?: string;
   updated_at?: string;
 }
