@@ -32,8 +32,18 @@ export const useGetAdminDashboard = () => {
   return { data, loading, error, getAdminDashboard, reset };
 };
 
+interface AdminOrdersResponse {
+  data: AdminOrder[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
 export const useGetAdminOrders = () => {
-  const { data, loading, error, execute, reset } = useGet<AdminOrder[]>();
+  const { data, loading, error, execute, reset } = useGet<AdminOrdersResponse>();
 
   const getAdminOrders = useCallback(async () => {
     return execute('/api/admin/orders');

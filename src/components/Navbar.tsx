@@ -100,7 +100,7 @@ px-4 py-2 rounded-xl
         >
             <div className="flex flex-wrap items-center justify-between w-full mx-auto max-w-7xl">
 
-                {/* 1. Logo Section */}
+
                 <div className="flex items-center gap-6">
                     <div onClick={() => navigate('/')} className="flex items-center gap-2 group cursor-pointer">
 
@@ -109,7 +109,7 @@ px-4 py-2 rounded-xl
                         </span>
                     </div>
 
-                    {/* Desktop Menu Links */}
+
                     <div className="hidden lg:flex items-center gap-1">
                         <Link to="/" className={linkClasses('/')}>
                             <HomeIcon className="w-4 h-4 mr-2" />

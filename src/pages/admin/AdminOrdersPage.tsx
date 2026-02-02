@@ -74,8 +74,8 @@ export default function AdminOrdersPage() {
   }, []);
 
   useEffect(() => {
-    if (ordersData) {
-      setOrders(ordersData);
+    if (ordersData?.data) {
+      setOrders(ordersData.data);
     }
   }, [ordersData]);
 
