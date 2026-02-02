@@ -407,7 +407,7 @@ export default function AdminProductsPage() {
     return (
       <div className="text-center py-12">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">{t('admin.products.errors.unableToLoad')}</h1>
-        <button 
+        <button
           onClick={fetchProducts}
           className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
         >
@@ -425,7 +425,7 @@ export default function AdminProductsPage() {
           <p className="text-gray-600">{t('admin.products.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button color="gray" onClick={handleImportClick} disabled={importing}>
+          <Button className="bg-gray-900 hover:bg-gray-800 text-white" onClick={handleImportClick} disabled={importing}>
             <Upload className="w-4 h-4 mr-2" />
             {importing ? t('admin.products.importing') : t('admin.products.import')}
           </Button>
@@ -440,7 +440,7 @@ export default function AdminProductsPage() {
             label=""
             dismissOnClick={true}
             renderTrigger={() => (
-              <Button color="gray">
+              <Button className="bg-gray-900 hover:bg-gray-800 text-white">
                 <Download className="w-4 h-4 mr-2" />
                 {t('admin.products.export')}
               </Button>
@@ -622,8 +622,8 @@ export default function AdminProductsPage() {
                       </td>
                       <td className="px-4 py-3">
                         {product.img ? (
-                          <img 
-                            src={product.img} 
+                          <img
+                            src={product.img}
                             alt={product.name}
                             className="w-12 h-12 rounded-lg object-cover"
                           />
@@ -660,11 +660,10 @@ export default function AdminProductsPage() {
                         {getCategoryName(product.category_id)}
                       </td>
                       <td className="px-4 py-3">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          product.status === 'active' 
-                            ? 'bg-green-100 text-green-800' 
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.status === 'active'
+                            ? 'bg-green-100 text-green-800'
                             : 'bg-gray-100 text-gray-600'
-                        }`}>
+                          }`}>
                           {product.status === 'active' ? (
                             <><Eye className="w-3 h-3 mr-1" /> {t('admin.products.status.active')}</>
                           ) : (
@@ -699,10 +698,10 @@ export default function AdminProductsPage() {
         {totalPages > 1 && (
           <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
             <div className="text-sm text-gray-600">
-              {t('admin.products.pagination.showing', { 
-                from: ((currentPage - 1) * itemsPerPage) + 1, 
-                to: Math.min(currentPage * itemsPerPage, filteredAndSortedProducts.length), 
-                total: filteredAndSortedProducts.length 
+              {t('admin.products.pagination.showing', {
+                from: ((currentPage - 1) * itemsPerPage) + 1,
+                to: Math.min(currentPage * itemsPerPage, filteredAndSortedProducts.length),
+                total: filteredAndSortedProducts.length
               })}
             </div>
             <div className="flex items-center gap-2">
@@ -757,8 +756,8 @@ export default function AdminProductsPage() {
           <Button color="gray" onClick={closeDeleteModal}>
             {t('admin.products.deleteModal.cancel')}
           </Button>
-          <Button 
-            color="gray" 
+          <Button
+            color="gray"
             onClick={handleDelete}
             disabled={deleting}
             className="bg-red-600 hover:bg-red-700 text-white"
@@ -787,8 +786,8 @@ export default function AdminProductsPage() {
           <Button color="gray" onClick={closeBulkDeleteModal}>
             {t('admin.products.deleteModal.cancel')}
           </Button>
-          <Button 
-            color="gray" 
+          <Button
+            color="gray"
             onClick={handleBulkDelete}
             disabled={deleting}
             className="bg-red-600 hover:bg-red-700 text-white"

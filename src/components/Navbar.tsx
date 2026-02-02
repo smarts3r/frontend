@@ -93,7 +93,7 @@ px-4 py-2 rounded-xl
 
     return (
         <nav
-            className={`transition-all duration-300 border-b border-gray-100 sticky top-0 z-50 py-3 ${scrolled
+            className={`transition-all duration-300 border-b border-gray-100 sticky top-0 z-50 py-6 md:py-3 sm:py-2 ${scrolled
                 ? 'bg-white/90 backdrop-blur-xl shadow-lg shadow-gray-200/20'
                 : 'bg-white/95 backdrop-blur-md shadow-sm'
                 } `}
@@ -103,9 +103,7 @@ px-4 py-2 rounded-xl
                 {/* 1. Logo Section */}
                 <div className="flex items-center gap-6">
                     <div onClick={() => navigate('/')} className="flex items-center gap-2 group cursor-pointer">
-                        <div className="w-10 h-10 bg-linear-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:scale-105 transition-transform duration-300">
-                            <span className="text-white font-black text-xl">S</span>
-                        </div>
+
                         <span className="text-xl font-black bg-clip-text text-transparent bg-linear-to-r from-gray-900 via-blue-900 to-indigo-900 hidden sm:block tracking-tight">
                             SmartS3r
                         </span>

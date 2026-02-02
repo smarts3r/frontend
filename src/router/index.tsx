@@ -16,7 +16,6 @@ import OrdersPage from "@/pages/OrdersPage";
 import CategoriesPage from "@/pages/CategoriesPage";
 import ProductsPage from "@/pages/ProductsPage";
 import ProfilePage from "@/pages/ProfilePage";
-import RegisterPage from "@/pages/RegisterPage";
 import RegisterWizardPage from "@/pages/RegisterWizardPage";
 import WishlistPage from "@/pages/WishlistPage";
 import { ProductDetailsPage } from "@/pages/ProductDetailsPage";

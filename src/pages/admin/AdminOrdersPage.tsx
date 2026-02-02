@@ -477,7 +477,7 @@ export default function AdminOrdersPage() {
             <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
             {isConnected ? t('admin.orders.live') : t('admin.orders.offline')}
           </div>
-          <Button color="gray" onClick={handleExport}>
+          <Button className="bg-gray-900 hover:bg-gray-800 text-white" onClick={handleExport}>
             <Download className="w-4 h-4 mr-2" />
             {t('admin.orders.exportAll')}
           </Button>
@@ -824,10 +824,10 @@ export default function AdminOrdersPage() {
 
         <div className="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
           <div className="text-sm text-gray-600">
-            {t('admin.orders.pagination.showing', { 
-              from: ((currentPage - 1) * itemsPerPage) + 1, 
-              to: Math.min(currentPage * itemsPerPage, filteredAndSortedOrders.length), 
-              total: filteredAndSortedOrders.length 
+            {t('admin.orders.pagination.showing', {
+              from: ((currentPage - 1) * itemsPerPage) + 1,
+              to: Math.min(currentPage * itemsPerPage, filteredAndSortedOrders.length),
+              total: filteredAndSortedOrders.length
             })}
           </div>
           <div className="flex items-center gap-2">

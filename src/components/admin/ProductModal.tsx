@@ -15,9 +15,11 @@ import {
   Loader2,
   AlertCircle,
   Eye,
-  EyeOff
+  EyeOff,
+  Check
 } from 'lucide-react';
 import type { Product, Category } from '@/types/types';
+import { useUploadFile } from '@/hooks/useAdmin';
 
 export interface ProductFormData {
   name: string;
@@ -71,6 +73,7 @@ export default function ProductModal({
   const [imageError, setImageError] = useState(false);
   const [imageTab, setImageTab] = useState<'url' | 'upload'>('url');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const { loading: uploading, execute: executeUpload } = useUploadFile();
   const modalRef = useRef<HTMLDivElement>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -93,6 +96,7 @@ export default function ProductModal({
           status: product.status
         });
         setImageTab(product.img ? 'url' : 'url');
+        setUploadedFile(null);
       } else {
         setFormData({
           name: '',
@@ -221,14 +225,28 @@ export default function ProductModal({
     setImageError(false);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setUploadedFile(file);
-      // For now, we'll just use the file name as a placeholder
-      // In a real implementation, you'd upload the file and get a URL
-      const objectUrl = URL.createObjectURL(file);
-      handleImageUrlChange(objectUrl);
+    if (!file) return;
+
+    setImageError(false);
+    setUploadedFile(file);
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const result = await executeUpload(formData);
+
+    if (result && result.url) {
+      handleImageUrlChange(result.url);
+    } else {
+      setImageError(true);
+      setUploadedFile(null);
+    }
+
+    // Reset file input so the same file can be selected again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -662,25 +680,44 @@ export default function ProductModal({
                   ) : (
                     <div>
                       <div
-                        onClick={() => fileInputRef.current?.click()}
-                        className={`border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-gray-400 transition-colors ${
-                          isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                        onClick={() => !uploading && fileInputRef.current?.click()}
+                        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                          uploading
+                            ? 'border-blue-300 bg-blue-50 cursor-not-allowed'
+                            : isLoading
+                            ? 'border-gray-300 opacity-50 cursor-not-allowed'
+                            : 'border-gray-300 cursor-pointer hover:border-gray-400'
                         }`}
                       >
-                        <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
-                        <p className="text-sm text-gray-600">
-                          {uploadedFile ? uploadedFile.name : 'Click to upload or drag and drop'}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          PNG, JPG, GIF up to 5MB
-                        </p>
+                        {uploading ? (
+                          <>
+                            <Loader2 className="w-8 h-8 mx-auto text-blue-500 mb-2 animate-spin" />
+                            <p className="text-sm text-blue-600">Uploading to Cloudinary...</p>
+                          </>
+                        ) : uploadedFile && formData.image && !imageError ? (
+                          <>
+                            <Check className="w-8 h-8 mx-auto text-green-500 mb-2" />
+                            <p className="text-sm text-green-600">{uploadedFile.name}</p>
+                            <p className="text-xs text-gray-400 mt-1">Click to change file</p>
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                            <p className="text-sm text-gray-600">
+                              {uploadedFile ? uploadedFile.name : 'Click to upload or drag and drop'}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              PNG, JPG, GIF up to 5MB
+                            </p>
+                          </>
+                        )}
                       </div>
                       <input
                         ref={fileInputRef}
                         type="file"
                         accept="image/*"
                         onChange={handleFileUpload}
-                        disabled={isLoading}
+                        disabled={isLoading || uploading}
                         className="hidden"
                       />
                     </div>

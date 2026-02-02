@@ -649,5 +649,43 @@
       "settings": "Settings",
       "logout": "Logout"
     }
+  },
+  "footer": {
+    "description": "Your premier destination for quality electronics and tech gadgets. Experience shopping reimagined with professional service and competitive prices.",
+    "newsletter": {
+      "title": "Subscribe to Our Newsletter",
+      "placeholder": "Enter your email",
+      "description": "Get exclusive offers and be the first to know about new products.",
+      "successMessage": "Thank you for subscribing with email: {{email}}"
+    },
+    "quickLinks": {
+      "title": "Quick Links",
+      "about": "About Us",
+      "contact": "Contact",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "faq": "FAQ"
+    },
+    "customerService": {
+      "title": "Customer Service",
+      "products": "Products",
+      "categories": "Categories",
+      "wishlist": "Wishlist",
+      "cart": "Shopping Cart"
+    },
+    "contact": {
+      "title": "Get in Touch",
+      "location": "Egypt",
+      "phone": "+20 10 123 4567",
+      "email": "support@smarts3r.com"
+    },
+    "social": {
+      "title": "Follow Us"
+    },
+    "legal": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "cookies": "Cookie Policy"
+    }
   }
 }
